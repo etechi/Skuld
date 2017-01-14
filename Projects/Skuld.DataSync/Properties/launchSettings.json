@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Skuld.DataSync": {
+      "commandName": "Project",
+      "commandLineArgs": "E:\\WS\\self\\github\\Skuld3\\Data"
+    }
+  }
+}
