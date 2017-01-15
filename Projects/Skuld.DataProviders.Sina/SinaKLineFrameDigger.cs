@@ -5,7 +5,7 @@ using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Text;
 using System.Threading.Tasks;
-
+using SF;
 namespace Skuld.DataProvider.Sina
 {
 	public class SinaKLineFrameDigger
@@ -20,27 +20,27 @@ namespace Skuld.DataProvider.Sina
 				{
 					new SymbolScope
 					{
-						Name="sh",
+						ScopeCode="sh",
 						Type=SymbolType.Index
 					},
 					new SymbolScope
 					{
-						Name="sh",
+						ScopeCode="sh",
 						Type=SymbolType.Stock
 					},
 					new SymbolScope
 					{
-						Name="sz",
+						ScopeCode="sz",
 						Type=SymbolType.Index
 					},
 					new SymbolScope
 					{
-						Name="sz",
+						ScopeCode="sz",
 						Type=SymbolType.Stock
 					},
 					new SymbolScope
 					{
-						Name="hs",
+						ScopeCode="hs",
 						Type=SymbolType.Index
 					}
 				};
@@ -128,17 +128,16 @@ namespace Skuld.DataProvider.Sina
 
 		}
 		public IObservable<KLineFrame> Dig(
-			SymbolScope Scope,
-			string Code,
+			Symbol Symbol,
 			int TimeInterval,
 			DateTime BeginTime,
 			DateTime EndTime
 		   )
 		{
-			if (Scope.Name != "sh" && Scope.Name != "sz")
+			if (Symbol.Scope.ScopeCode != "sh" && Symbol.Scope.ScopeCode != "sz")
 				throw new NotSupportedException();
 
-			var symbol = Scope.Name + Code;
+			var symbol = Symbol.Scope.ScopeCode + Symbol.Code;
 			int scale;
 			int count;
 			var curTime = DateTime.Now;
@@ -154,7 +153,7 @@ namespace Skuld.DataProvider.Sina
 			}
 			else
 				throw new NotSupportedException();
-			var frames = GetKLineFrame(symbol, scale, count, Scope.Type == SymbolType.Stock);
+			var frames = GetKLineFrame(symbol, scale, count, Symbol.Scope.Type == SymbolType.Stock);
 			if (frames == null)
 				return Observable.Empty<KLineFrame>();
 			return from rs in frames.ToObservable()

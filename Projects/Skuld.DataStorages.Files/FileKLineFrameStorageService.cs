@@ -5,16 +5,10 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using SF;
 namespace Skuld.DataStorage.Files
 {
-	public class KLineFrameRange
-	{
-		public SymbolScope Scope { get; set; }
-		public string Code { get; set; }
-		public int Interval { get; set; }
-		public TimeRange TimeRange { get; set; }
-	}
+	
 	public class FileKLineFrameStorageService 
 	{
 		public string BasePath { get; }
@@ -70,13 +64,16 @@ namespace Skuld.DataStorage.Files
 		{
 			return symbols
 				.Select(s => {
-					var state = LoadState(s.Scope.Name, s.Code);
+					var state = LoadState(s.Scope.ScopeCode, s.Code);
 					var end = state.EndTimes?.Get(Interval) ?? new DateTime(1990, 1, 1);
 					var now = DateTime.Now;
 					return new KLineFrameRange
 					{
-						Code = s.Code,
-						Scope = s.Scope,
+						Symbol = new Symbol
+						{
+							Code = s.Code,
+							Scope = s.Scope
+						},
 						Interval = Interval,
 						TimeRange = new TimeRange
 						{
@@ -120,7 +117,7 @@ namespace Skuld.DataStorage.Files
 		}
 		public IObservable<KLineFrame> Load(SymbolScope Scope, string Code, int Interval, TimeRange TimeRange)
 		{
-			var fs = GetDataPath(Scope.Name, Code, Interval);
+			var fs = GetDataPath(Scope.ScopeCode, Code, Interval);
 			var frames = ReadKLineFrames(fs);
 			var ob = frames.ToObservable();
 			if (TimeRange == null)
@@ -132,7 +129,7 @@ namespace Skuld.DataStorage.Files
 		{
 
 			Dictionary<DateTime, KLineFrame> frames = null;
-			var fs = GetDataPath(Scope.Name, Code, Interval);
+			var fs = GetDataPath(Scope.ScopeCode, Code, Interval);
 
 			await Frames.ForEachAsync(frame =>
 			{
@@ -145,14 +142,14 @@ namespace Skuld.DataStorage.Files
 				return;
 			var arr = frames.Values.ToArray();
 			Array.Sort(arr, (x, y) => x.Time.CompareTo(y.Time));
-			var state = LoadState(Scope.Name, Code);
+			var state = LoadState(Scope.ScopeCode, Code);
 			state.EndTimes[Interval] = arr[arr.Length - 1].Time;
 			var sb = new StringBuilder();
 			foreach (var a in arr)
 				sb.AppendLine($"{a.Time},{a.Open},{a.Close},{a.Low},{a.High},{a.Volume:0},{a.AdjuestRate}");
 			System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(fs));
 			System.IO.File.WriteAllText(fs, sb.ToString());
-			SaveState(Scope.Name, Code, state);
+			SaveState(Scope.ScopeCode, Code, state);
 		}
 	}
 }

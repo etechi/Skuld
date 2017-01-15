@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Skuld
+namespace SF
 {
 	public static class SimpleTemplate
 	{

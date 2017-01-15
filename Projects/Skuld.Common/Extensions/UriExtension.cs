@@ -5,7 +5,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Skuld
+namespace SF
 {
 	public static class UriExtension
 	{
@@ -395,24 +395,36 @@ namespace Skuld
         }
 		static UriExtension()
 		{
-			Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+			//Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 			GBK = Encoding.GetEncoding("GBK");
 		}
 		public static Encoding GBK { get; }
-        public static async Task<string> GetString(this Uri uri,Encoding Encoding=null, int Timeout = 10)
+        public static async Task<string> GetString(this Uri uri,Encoding Encoding=null, int Retry=5,int Timeout = 20)
         {
-            using(var cli=new HttpClient())
-            {
-                cli.Timeout = TimeSpan.FromSeconds(Timeout);
-				return Encoding == null ?
-					await cli.GetStringAsync(uri) :
-					Encoding.GetString(await cli.GetByteArrayAsync(uri))
-					;
-            }
+			for (var i=0;i<Retry;i++)
+			{
+				try
+				{
+					using (var cli = new HttpClient())
+					{
+						cli.Timeout = TimeSpan.FromSeconds(Timeout);
+						return Encoding == null ?
+							await cli.GetStringAsync(uri) :
+							Encoding.GetString(await cli.GetByteArrayAsync(uri))
+							;
+					}
+				}
+				catch
+				{
+					if (i == Retry - 1)
+						throw;
+				}
+			}
+			throw new NotSupportedException();
         }
-		public static async Task<T> Get<T>(this Uri uri,Encoding Encoding = null, int Timeout = 10)
+		public static async Task<T> Get<T>(this Uri uri,Encoding Encoding = null, int Retry = 5, int Timeout = 20)
 		{
-			var str = await uri.GetString( Encoding, Timeout);
+			var str = await uri.GetString( Encoding, Retry, Timeout);
 			return Json.Parse<T>(str);
 		}
         public static async Task<string> PostAndReturnString(this Uri uri, HttpContent content)

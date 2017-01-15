@@ -4,7 +4,7 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
-
+using SF;
 namespace Skuld.DataProvider.Sina
 {
 	public class SinaSymbolScanner
@@ -53,10 +53,10 @@ namespace Skuld.DataProvider.Sina
 		}
 		public IObservable<Symbol> Scan()
 		{
-			var sha = new SymbolScope { Name = "sh", Type = SymbolType.Stock };
-			var shi = new SymbolScope { Name = "sh", Type = SymbolType.Index };
-			var sza = new SymbolScope { Name = "sz", Type = SymbolType.Stock };
-			var szi = new SymbolScope { Name = "sz", Type = SymbolType.Index };
+			var sha = new SymbolScope { ScopeCode = "sh", Type = SymbolType.Stock };
+			var shi = new SymbolScope { ScopeCode = "sh", Type = SymbolType.Index };
+			var sza = new SymbolScope { ScopeCode = "sz", Type = SymbolType.Stock };
+			var szi = new SymbolScope { ScopeCode = "sz", Type = SymbolType.Index };
 			var a = GetAllRecords("hs_a").Select(
 					r => new Symbol
 					{
