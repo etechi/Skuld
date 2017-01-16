@@ -4,8 +4,9 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
-namespace Skuld.DataStorage.EFCore.Models
+namespace Skuld.DataStorages.Entity.Models
 {
+	[Table("Categories")]
 	public class Category
 	{
 		[Key]
@@ -19,5 +20,11 @@ namespace Skuld.DataStorage.EFCore.Models
 		[MaxLength(100)]
 		[Required]
 		public string Name { get; set; }
-    }
+
+		[ConcurrencyCheck]
+		[Timestamp]
+		[Display(Name = "乐观锁时间戳")]
+		public byte[] TimeStamp { get; set; }
+
+	}
 }

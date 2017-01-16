@@ -13,7 +13,7 @@ namespace Skuld.DataSync.Migrations
         
         string IMigrationMetadata.Id
         {
-            get { return "201701150843314_init"; }
+            get { return "201701161652249_init"; }
         }
         
         string IMigrationMetadata.Source

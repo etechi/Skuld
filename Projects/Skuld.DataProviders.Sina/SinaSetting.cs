@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Skuld.DataProvider.Sina
+namespace Skuld.DataProviders.Sina
 {
 	public class SinaSetting
 	{
@@ -22,14 +22,29 @@ namespace Skuld.DataProvider.Sina
 		public string TradePriceUrl { get;  set; } = "http://money.finance.sina.com.cn/quotes_service/api/jsonp_v2.php/a/CN_MarketData.getKLineData?symbol={SYMBOL}&scale={SCALE}&ma=no&datalen={COUNT}";
 
 
-		//分红
-		//http://stocks.sina.cn/sh/finance?vt=4&code=sh601766
-
 		//上市时间，基本信息
-		//http://stocks.sina.cn/sh/company?vt=4&code=sh601766
+		//http://stocks.sina.cn/sh/company?vt=4&code=sh601766 PS
+		//股本结构
+		//http://stocks.sina.cn/sh/capital?vt=4&code=sh601766 Date PS
+		//十大股东
+		//http://stocks.sina.cn/sh/holder?vt=4&code=sh601766 Date PS[]
+		//财务摘要
+		//http://stocks.sina.cn/sh/abstr?vt=4&code=sh601766 [Date PS][]
+		//分红信息
+		//http://stocks.sina.cn/sh/finance?vt=4&code=sh601766 [Date Ps][]
+		//资产负债
+		//http://stocks.sina.cn/sh/liab?vt=4&code=sh601766 [Unit] [Date Ps][]
+		//利润简表
+		//http://stocks.sina.cn/sh/profit?vt=4&code=sh601766 [Unit] [Date Ps][]
+		//现金流量
+		//http://stocks.sina.cn/sh/cash?vt=4&code=sh601766 [Unit] [Date Ps][]
+
+		[Display(Name = "属性")]
+		public string PropertyUrl { get; set; } = "http://stocks.sina.cn/sh/{TYPE}?vt=4&code={SYMBOL}";
 
 		//所属板块
-		//http://stock1.sina.cn/dpool/stock_new/v2/stock_owner.php?vt=4&code=sh601766
+		[Display(Name = "所属板块")]
+		public string CategoryUrl { get; set; } = "http://stock1.sina.cn/dpool/stock_new/v2/stock_owner.php?vt=4&code={SYMBOL}";
 
 		//当日行情
 		//http://hq.sinajs.cn/rn=votr3&list=sz300519,sz002802,sz300515,sh603016,sh603909,sz002789,sz300522,sh603268,sz002801,sz300518,sh603618,sh603029,sz002248,sz002703,sz000835,sz002098,sz002799,sz300500,sz300450,sh601069,sz002759,sh603309,sh603919,sz002788,sz002392,sh601388,sh600503,sh603318,sz002800,sz002115,sz002795,sz300508,sh600758,sh600516,sz002124,sz002766,sz300126,sz000785,sh603958,sz300292,sz002716,sz300501

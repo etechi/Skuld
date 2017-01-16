@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Data.Entity;
 using System.Text;
 
-namespace Skuld.DataStorage.EFCore
+namespace Skuld.DataStorages.Entity
 {
     public class AppContext : DbContext
     {
@@ -26,9 +26,11 @@ namespace Skuld.DataStorage.EFCore
 		public DbSet<Models.CategorySymbol> CategorySymbols { get; set; }
 		public DbSet<Models.CategoryType> CategoryTypes { get; set; }
 
-		public DbSet<Models.SymbolPropertyCategory> SymbolPropertyCategories { get; set; }
-		public DbSet<Models.SymbolPropertyItem> SymbolPropertyItems { get; set; }
-		public DbSet<Models.SymbolPropertyUpdate> SymbolPropertyUpdates { get; set; }
+		public DbSet<Models.PropertyGroup> PropertyGroups { get; set; }
+		public DbSet<Models.PropertyItem> PropertyItems { get; set; }
+		public DbSet<Models.SymbolPropertyGroup> SymbolPropertyGroups { get; set; }
 		public DbSet<Models.SymbolPropertyValue> SymbolPropertyValues { get; set; }
+		public DbSet<Models.SymbolPropertyGroupHistory> SymbolPropertyGroupHistory { get; set; }
+		public DbSet<Models.SymbolPropertyValueHistory> SymbolPropertyValueHistory { get; set; }
 	}
 }

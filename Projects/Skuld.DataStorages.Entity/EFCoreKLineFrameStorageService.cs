@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using SF;
 using System.Data.Entity;
 
-namespace Skuld.DataStorage.EFCore
+namespace Skuld.DataStorages.Entity
 {
 	
 	public class EFCoreKLineFrameStorageService 
@@ -62,39 +62,36 @@ namespace Skuld.DataStorage.EFCore
 			System.IO.File.WriteAllText(sf, Json.Stringify(State));
 		}
 
-		public IObservable<KLineFrameRange> GetKLineFrameRequired(IObservable<Symbol> symbols, int Interval)
+		public KLineFrameRange GetKLineFrameRequired(Symbol symbol, int Interval)
 		{
-			return symbols
-				.Select(s => {
-					DateTime endTime;
-					using (var ctx = new AppContext(ConnectionString))
-					{
-						var id = s.GetIdent();
-						endTime = ctx.Prices
-							.Where(p => p.Symbol == id && p.Interval == Interval)
-							.OrderByDescending(p => p.Time)
-							.Take(1)
-							.Select(p=>p.Time)
-							.SingleOrDefault();
-					}
+			DateTime endTime;
+			using (var ctx = new AppContext(ConnectionString))
+			{
+				var id = symbol.GetIdent();
+				endTime = ctx.Prices
+					.Where(p => p.Symbol == id && p.Interval == Interval)
+					.OrderByDescending(p => p.Time)
+					.Take(1)
+					.Select(p=>p.Time)
+					.SingleOrDefault();
+			}
 
-					var end = endTime==default(DateTime)?new DateTime(1990, 1, 1):endTime;
-					var now = DateTime.Now;
-					return new KLineFrameRange
-					{
-						Symbol=new Symbol
-						{
-							Code = s.Code,
-							Scope = s.Scope
-						},
-						Interval = Interval,
-						TimeRange = new TimeRange
-						{
-							Begin = now.Subtract(end).TotalMinutes < Interval ? now : end,
-							End = now
-						}
-					};
-				});
+			var end = endTime==default(DateTime)?new DateTime(1990, 1, 1):endTime;
+			var now = DateTime.Now;
+			return new KLineFrameRange
+			{
+				Symbol=new Symbol
+				{
+					Code = symbol.Code,
+					Scope = symbol.Scope
+				},
+				Interval = Interval,
+				TimeRange = new TimeRange
+				{
+					Begin = now.Subtract(end).TotalMinutes < Interval ? now : end,
+					End = now
+				}
+			};
 		}
 
 		IEnumerable<KLineFrame> ReadKLineFrames(string Path)

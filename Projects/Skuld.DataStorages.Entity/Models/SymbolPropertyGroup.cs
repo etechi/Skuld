@@ -4,9 +4,10 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
-namespace Skuld.DataStorage.EFCore.Models
+namespace Skuld.DataStorages.Entity.Models
 {
-	public class SymbolPropertyUpdate
+	[Table("SymbolPropertyGroups")]
+	public class SymbolPropertyGroup
 	{
 		[Key]
 		[Column(Order = 1)]
@@ -18,11 +19,12 @@ namespace Skuld.DataStorage.EFCore.Models
 		[Column(Order = 2)]
 		[MaxLength(50)]
 		[Required]
-		public string Category { get; set; }
+		public string Group { get; set; }
 
-		[Key]
-		[Column(Order = 3)]
 		public DateTime Time { get; set; }
 
+		public int RowCount { get; set; }
+
+		public DateTime? NextUpdateTime { get; set; }
 	}
 }

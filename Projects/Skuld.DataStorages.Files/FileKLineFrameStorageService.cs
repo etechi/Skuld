@@ -6,7 +6,7 @@ using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using SF;
-namespace Skuld.DataStorage.Files
+namespace Skuld.DataStorages.Files
 {
 	
 	public class FileKLineFrameStorageService 

@@ -6,7 +6,7 @@ using System.Reactive.Threading.Tasks;
 using System.Text;
 using System.Threading.Tasks;
 using SF;
-namespace Skuld.DataProvider.Sina
+namespace Skuld.DataProviders.Sina
 {
 	public class SinaKLineFrameDigger
 	{

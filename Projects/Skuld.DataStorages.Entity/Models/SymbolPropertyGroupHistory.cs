@@ -6,27 +6,27 @@ using System.Text;
 
 namespace Skuld.DataStorages.Entity.Models
 {
-	[Table("Prices")]
-	public class Price
+	[Table("SymbolPropertyGroupHistories")]
+	public class SymbolPropertyGroupHistory
 	{
 		[Key]
-		[Column(Order =1)]
+		[Column(Order = 1)]
 		[MaxLength(20)]
+		[Required]
 		public string Symbol { get; set; }
 
 		[Key]
-		[Column(Order=2)]
-		public int Interval { get; set; }
+		[Column(Order = 2)]
+		[MaxLength(50)]
+		[Required]
+		public string Group { get; set; }
 
 		[Key]
 		[Column(Order = 3)]
 		public DateTime Time { get; set; }
 
-		public float Open { get; set; }
-		public float Close { get; set; }
-		public float High { get; set; }
-		public float Low { get; set; }
-		public float Volume { get; set; }
-		public float AdjustRate { get; set; }
-    }
+		public int RowCount { get; set; }
+
+
+	}
 }

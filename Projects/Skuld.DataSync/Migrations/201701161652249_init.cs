@@ -13,6 +13,7 @@ namespace Skuld.DataSync.Migrations
                     {
                         Type = c.String(nullable: false, maxLength: 100),
                         Name = c.String(nullable: false, maxLength: 100),
+                        TimeStamp = c.Binary(nullable: false, fixedLength: true, timestamp: true, storeType: "rowversion"),
                     })
                 .PrimaryKey(t => new { t.Type, t.Name });
             
@@ -23,14 +24,17 @@ namespace Skuld.DataSync.Migrations
                         Type = c.String(nullable: false, maxLength: 100),
                         Category = c.String(nullable: false, maxLength: 100),
                         Symbol = c.String(nullable: false, maxLength: 100),
+                        TimeStamp = c.Binary(nullable: false, fixedLength: true, timestamp: true, storeType: "rowversion"),
                     })
-                .PrimaryKey(t => new { t.Type, t.Category, t.Symbol });
+                .PrimaryKey(t => new { t.Type, t.Category, t.Symbol })
+                .Index(t => new { t.Type, t.Symbol }, name: "symbol");
             
             CreateTable(
                 "dbo.CategoryTypes",
                 c => new
                     {
                         Name = c.String(nullable: false, maxLength: 50),
+                        TimeStamp = c.Binary(nullable: false, fixedLength: true, timestamp: true, storeType: "rowversion"),
                     })
                 .PrimaryKey(t => t.Name);
             
@@ -51,43 +55,73 @@ namespace Skuld.DataSync.Migrations
                 .PrimaryKey(t => new { t.Symbol, t.Interval, t.Time });
             
             CreateTable(
-                "dbo.SymbolPropertyCategories",
+                "dbo.PropertyGroups",
                 c => new
                     {
                         Name = c.String(nullable: false, maxLength: 50),
+                        TimeStamp = c.Binary(nullable: false, fixedLength: true, timestamp: true, storeType: "rowversion"),
                     })
                 .PrimaryKey(t => t.Name);
             
             CreateTable(
-                "dbo.SymbolPropertyItems",
+                "dbo.PropertyItems",
                 c => new
                     {
-                        Category = c.String(nullable: false, maxLength: 50),
+                        Group = c.String(nullable: false, maxLength: 50),
                         Name = c.String(nullable: false, maxLength: 50),
+                        TimeStamp = c.Binary(nullable: false, fixedLength: true, timestamp: true, storeType: "rowversion"),
                     })
-                .PrimaryKey(t => new { t.Category, t.Name });
+                .PrimaryKey(t => new { t.Group, t.Name });
             
             CreateTable(
-                "dbo.SymbolPropertyUpdates",
+                "dbo.SymbolPropertyGroupHistories",
                 c => new
                     {
                         Symbol = c.String(nullable: false, maxLength: 20),
-                        Category = c.String(nullable: false, maxLength: 50),
+                        Group = c.String(nullable: false, maxLength: 50),
                         Time = c.DateTime(nullable: false),
+                        RowCount = c.Int(nullable: false),
                     })
-                .PrimaryKey(t => new { t.Symbol, t.Category, t.Time });
+                .PrimaryKey(t => new { t.Symbol, t.Group, t.Time });
+            
+            CreateTable(
+                "dbo.SymbolPropertyGroups",
+                c => new
+                    {
+                        Symbol = c.String(nullable: false, maxLength: 20),
+                        Group = c.String(nullable: false, maxLength: 50),
+                        Time = c.DateTime(nullable: false),
+                        RowCount = c.Int(nullable: false),
+                        NextUpdateTime = c.DateTime(),
+                    })
+                .PrimaryKey(t => new { t.Symbol, t.Group });
+            
+            CreateTable(
+                "dbo.SymbolPropertyValueHistories",
+                c => new
+                    {
+                        Symbol = c.String(nullable: false, maxLength: 20),
+                        Group = c.String(nullable: false, maxLength: 50),
+                        Time = c.DateTime(nullable: false),
+                        Property = c.String(nullable: false, maxLength: 50),
+                        Row = c.Int(nullable: false),
+                        Value = c.String(nullable: false, maxLength: 1000),
+                        Number = c.Double(),
+                    })
+                .PrimaryKey(t => new { t.Symbol, t.Group, t.Time, t.Property, t.Row });
             
             CreateTable(
                 "dbo.SymbolPropertyValues",
                 c => new
                     {
                         Symbol = c.String(nullable: false, maxLength: 20),
-                        Category = c.String(nullable: false, maxLength: 50),
-                        Time = c.DateTime(nullable: false),
+                        Group = c.String(nullable: false, maxLength: 50),
                         Property = c.String(nullable: false, maxLength: 50),
-                        Value = c.String(nullable: false, maxLength: 200),
+                        Row = c.Int(nullable: false),
+                        Value = c.String(nullable: false, maxLength: 1000),
+                        Number = c.Double(),
                     })
-                .PrimaryKey(t => new { t.Symbol, t.Category, t.Time, t.Property });
+                .PrimaryKey(t => new { t.Symbol, t.Group, t.Property, t.Row });
             
             CreateTable(
                 "dbo.Symbols",
@@ -105,11 +139,14 @@ namespace Skuld.DataSync.Migrations
         
         public override void Down()
         {
+            DropIndex("dbo.CategorySymbols", "symbol");
             DropTable("dbo.Symbols");
             DropTable("dbo.SymbolPropertyValues");
-            DropTable("dbo.SymbolPropertyUpdates");
-            DropTable("dbo.SymbolPropertyItems");
-            DropTable("dbo.SymbolPropertyCategories");
+            DropTable("dbo.SymbolPropertyValueHistories");
+            DropTable("dbo.SymbolPropertyGroups");
+            DropTable("dbo.SymbolPropertyGroupHistories");
+            DropTable("dbo.PropertyItems");
+            DropTable("dbo.PropertyGroups");
             DropTable("dbo.Prices");
             DropTable("dbo.CategoryTypes");
             DropTable("dbo.CategorySymbols");

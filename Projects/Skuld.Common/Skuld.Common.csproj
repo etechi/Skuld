@@ -78,6 +78,7 @@
     <Compile Include="Extensions\SimpleTemplate.cs" />
     <Compile Include="Extensions\StringExtension.cs" />
     <Compile Include="Extensions\UriExtension.cs" />
+    <Compile Include="PropertyGroup.cs" />
     <Compile Include="KLineFrame.cs" />
     <Compile Include="KLineFrameRange.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

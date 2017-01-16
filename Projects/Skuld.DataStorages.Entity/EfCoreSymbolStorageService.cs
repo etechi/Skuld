@@ -6,7 +6,7 @@ using SF;
 using System.Linq;
 using System.Data.Entity;
 
-namespace Skuld.DataStorage.EFCore
+namespace Skuld.DataStorages.Entity
 {
 	public class EFCoreSymbolStorageService
 	{

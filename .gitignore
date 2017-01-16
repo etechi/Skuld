@@ -4,3 +4,4 @@ bin
 /Projects/Sites/ManagementConsole/node_modules
 *.suo
 /dotNetCore
+/Projects/packages

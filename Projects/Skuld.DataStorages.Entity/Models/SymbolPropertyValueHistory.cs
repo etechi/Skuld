@@ -6,8 +6,8 @@ using System.Text;
 
 namespace Skuld.DataStorages.Entity.Models
 {
-	[Table("SymbolPropertyValues")]
-	public class SymbolPropertyValue
+	[Table("SymbolPropertyValueHistories")]
+	public class SymbolPropertyValueHistory
 	{
 		[Key]
 		[Column(Order =1)]
@@ -23,21 +23,24 @@ namespace Skuld.DataStorages.Entity.Models
 
 		[Key]
 		[Column(Order = 3)]
+		public DateTime Time { get; set; }
+
+		[Key]
+		[Column(Order = 4)]
 		[MaxLength(50)]
 		[Required]
 		public string Property { get; set; }
+
 		[Key]
-		[Column(Order = 4)]
+		[Column(Order = 5)]
 		[DatabaseGenerated(DatabaseGeneratedOption.None)]
 		public int Row { get; set; }
-
 
 		[Required]
 		[MaxLength(1000)]
 		public string Value { get; set; }
 
 		public double? Number { get; set; }
-
 
 	}
 }

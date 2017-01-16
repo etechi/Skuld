@@ -5,14 +5,14 @@ namespace Skuld.DataSync.Migrations
     using System.Data.Entity.Migrations;
     using System.Linq;
 
-    internal sealed class Configuration : DbMigrationsConfiguration<Skuld.DataStorage.EFCore.AppContext>
+    internal sealed class Configuration : DbMigrationsConfiguration<Skuld.DataStorages.Entity.AppContext>
     {
         public Configuration()
         {
             AutomaticMigrationsEnabled = false;
         }
 
-        protected override void Seed(Skuld.DataStorage.EFCore.AppContext context)
+        protected override void Seed(Skuld.DataStorages.Entity.AppContext context)
         {
             //  This method will be called after migrating to the latest version.
 

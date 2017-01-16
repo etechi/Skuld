@@ -67,15 +67,19 @@
   <ItemGroup>
     <Compile Include="AppContext.cs" />
     <Compile Include="EFCoreKLineFrameStorageService.cs" />
+    <Compile Include="EfCoreSymbolPropertyStorageService.cs" />
+    <Compile Include="EfCoreSymbolCategoryStorageService.cs" />
     <Compile Include="EfCoreSymbolStorageService.cs" />
     <Compile Include="Models\Category.cs" />
     <Compile Include="Models\CategorySymbol.cs" />
     <Compile Include="Models\CategoryType.cs" />
     <Compile Include="Models\Price.cs" />
     <Compile Include="Models\Symbol.cs" />
-    <Compile Include="Models\SymbolPropertyCategory.cs" />
-    <Compile Include="Models\SymbolPropertyItem.cs" />
-    <Compile Include="Models\SymbolPropertyUpdate.cs" />
+    <Compile Include="Models\PropertyGroup.cs" />
+    <Compile Include="Models\PropertyItem.cs" />
+    <Compile Include="Models\SymbolPropertyGroup.cs" />
+    <Compile Include="Models\SymbolPropertyGroupHistory.cs" />
+    <Compile Include="Models\SymbolPropertyValueHistory.cs" />
     <Compile Include="Models\SymbolPropertyValue.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

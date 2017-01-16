@@ -4,7 +4,7 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using SF;
 using System.Linq;
-namespace Skuld.DataStorage.Files
+namespace Skuld.DataStorages.Files
 {
 	public class FileSymbolStorageService
 	{
