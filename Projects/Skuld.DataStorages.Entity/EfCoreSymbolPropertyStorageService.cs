@@ -214,7 +214,7 @@ namespace Skuld.DataStorages.Entity
 					//如果比当前组时间新，需要新建组
 					else if (group.Time.Value > curGroup.Time)
 					{
-						await MergeGroup(ctx, id, group, null, group.Time.Value);
+						await MergeGroup(ctx, id, group, curGroup, group.Time.Value);
 						await MergeGroupHistory(ctx, id, group, null, group.Time.Value);
 					}
 					//如果比当前组时间旧，需要合并或新增历史组
