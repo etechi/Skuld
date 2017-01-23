@@ -8,98 +8,96 @@ using System.IO;
 using System.Reactive.Joins;
 using System.Collections.Generic;
 using System.Reactive.Disposables;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using SF.Data.Entity.EntityFrameworkCore;
+using SF.DI;
+using Skuld.DataProviders;
+using Skuld.DataStorages;
+using SF.Serialization;
 
-class Program
+namespace Skuld.DataSync
 {
-	static string connString = "name=skuld";
-	static SinaSetting SinaSetting = new SinaSetting();
-
-	static async Task DigPrice(Symbol symbol)
+	public class AppContext : DbContext
 	{
-		var KLineFrameStorageService = new EFCoreKLineFrameStorageService(connString);
-		var KLineFrameDigger = new SinaKLineFrameDigger(SinaSetting);
-		var range = KLineFrameStorageService.GetKLineFrameRequired(
-			symbol,
-			TimeIntervals.Day
-			);
-		if (range.TimeRange.Begin >= range.TimeRange.End)
-			return;
-		var lines = KLineFrameDigger.Dig(
-			range.Symbol,
-			TimeIntervals.Day,
-			range.TimeRange.Begin,
-			range.TimeRange.End
-			);
-		await KLineFrameStorageService.Update(
-			range.Symbol,
-			TimeIntervals.Day,
-			lines
-			);
-	}
-
-	static async Task DigCategory(Symbol symbol)
-	{
-		if (symbol.Scope.Type != SymbolType.Stock)
-			return;
-		var CatStorageService = new EFCoreSymbolCategoryStorageService(connString);
-		var CatDigger = new SinaSymbolCategoryDigger(SinaSetting);
-
-		var re=await CatDigger.Dig(symbol);
-		if (re == null)
-			return;
-		await CatStorageService.Update(symbol, re);
-	}
-	static async Task DigProperty(Symbol symbol)
-	{
-		if (symbol.Scope.Type != SymbolType.Stock)
-			return;
-		var PropStorageService = new EFCoreSymbolPropertyStorageService(connString);
-		var PropDigger = new SinaSymbolPropertyDigger(SinaSetting);
-
-		var updateTimes = await PropStorageService.GetNextUpdateTimes(symbol);
-		var re = PropDigger.Dig(symbol, updateTimes);
-		await PropStorageService.Update(symbol, re);
-	}
-	static async Task Sync()
-	{
-		var SymbolScanner = new SinaSymbolScanner(SinaSetting);
-		var SymbolStorageService = new EFCoreSymbolStorageService(connString);
-		var fc = new SF.FlowController(40,TimeSpan.FromMilliseconds(100));
-
-		var ss = SymbolScanner.Scan();
-		await SymbolStorageService.Update(ss);
-
-		await SymbolStorageService.List(null)
-			.Select((s, i) => new { s = s, i = i })
-			.Delay(r => fc.Next(r.i))
-			.Select(s=>s.s)
-			.SelectMany(
-				async (symbol) =>
-				{
-					try
-					{
-						Console.WriteLine($"dig {symbol} {fc.CurrentThreadCount}/{fc.WaitingCount}");
-						await DigPrice(symbol);
-						await DigCategory(symbol);
-						await DigProperty(symbol);
-						Console.WriteLine($"dig {symbol} done!");
-					}
-					catch (Exception e)
-					{
-						Console.WriteLine($"dig {symbol} error {e.Message}!");
-					}
-					finally
-					{
-						fc.Complete();
-					}
-					return 0;
-				})
-			.ForEachAsync(o => { });
+		public AppContext(DbContextOptions<AppContext> options)
+			: base(options)
+		{ }
 
 	}
-	static void Main(string[] args)
-    {
-		Sync().Wait();
+	public class Startup
+	{
+		// This method gets called by the runtime. Use this method to add services to the container.
+		public IServiceProvider ConfigureServices(IServiceCollection services)
+		{
+			//if (System.Diagnostics.Debugger.IsAttached == false)
+			//	System.Diagnostics.Debugger.Launch();
+			var connection = @"data source=localhost\SQLEXPRESS;initial catalog=skuld2;user id=sa;pwd=system;MultipleActiveResultSets=True;App=EntityFramework";
+			services.AddDbContext<AppContext>(
+				(isp, options) =>
+				options.LoadDataModels(isp).UseSqlServer(connection)
+				);
 
-    }
+			// Add framework services.
+			var sc = services.GetDIServiceCollection();
+
+			sc.UseNewtonsoftJson();
+
+			////sc.AddTransient<IAdd, Add>();
+			//sc.UseMemoryManagedServiceSource();
+
+			//var msc = new ManagedServiceCollection(sc);
+			//msc.SetupServices();
+			//msc.UseEFCoreIdentGenerator("App");
+			//msc.UseEFCoreUser("App");
+
+			//sc.UseServiceMetadata();
+
+			sc.UseSinaDataProviders();
+			sc.UseEntityDataStorages("Skuld");
+			sc.UseEFCoreDataEntity<AppContext>();
+
+			services.AddTransient<SyncRunner>();
+
+			services.AddScoped<SymbolSyncRunner>();
+
+			services.AddScoped<PriceSyncRunner>();
+			services.AddScoped<CategorySyncRunner>();
+			services.AddScoped<PropertySyncRunner>();
+
+			var sp = services.BuildServiceProvider();
+			return sp;
+		}
+	}
+	
+	
+	
+	class Program
+	{
+		
+		//static async Task Test()
+		//{
+		//	Console.WriteLine(DateTime.Now);
+		//	var fc = new SF.FlowController(1);
+		//	await Enumerable.Range(0, 100).ToObservable()
+		//		.Delay(r => Observable.FromAsync(fc.Wait).IgnoreElements())
+		//		.SelectMany(async r =>
+		//		{
+		//			await Task.Delay(1000);
+		//			Console.WriteLine($"{r} {DateTime.Now}");
+		//			fc.Complete();
+		//			return r;
+		//		})
+		//		.ForEachAsync(o => { });
+
+		//}
+		static void Main(string[] args)
+		{
+			var sc = new ServiceCollection();
+			var sp=new Startup().ConfigureServices(sc);
+			var runner = sp.GetRequiredService<SyncRunner>();
+			runner.Execute().Wait();
+		}
+	}
 }

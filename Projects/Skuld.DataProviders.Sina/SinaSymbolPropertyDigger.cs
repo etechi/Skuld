@@ -10,7 +10,7 @@ using System.Text.RegularExpressions;
 namespace Skuld.DataProviders.Sina
 {
 	
-	public class SinaSymbolPropertyDigger
+	public class SinaSymbolPropertyDigger : DataProviders.ISymbolPropertyDigger
 	{
 		static Regex RegHtmlClear = new Regex("<[^>]+>");
 		async Task<string> Dig(Symbol symbol,string type,string startContent)

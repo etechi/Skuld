@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using SF;
 namespace Skuld.DataProviders.Sina
 {
-	public class SinaSymbolScanner
+	public class SinaSymbolScanner : DataProviders.ISymbolScanner
 	{
 		class record
 		{

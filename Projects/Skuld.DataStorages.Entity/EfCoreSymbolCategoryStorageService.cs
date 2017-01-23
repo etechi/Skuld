@@ -4,81 +4,55 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using SF;
 using System.Linq;
-using System.Data.Entity;
+using SF.Data.Entity;
 
 namespace Skuld.DataStorages.Entity
 {
-	public class EFCoreSymbolCategoryStorageService
+	public class EFCoreSymbolCategoryStorageService : ISymbolCategoryStorageService
 	{
-		string ConnectionString { get; }
-		public EFCoreSymbolCategoryStorageService(string ConnectionString)
+		IDataContext Context { get; }
+		public EFCoreSymbolCategoryStorageService(IDataContext Context)
 		{
-			this.ConnectionString = ConnectionString;
+			this.Context = Context;
 		}
 		async Task EnsureCategoryType(string type)
 		{
-			await Tasks.Retry(async ct =>
-			{
-				using (var ctx = new AppContext(ConnectionString))
-				{
-					var ctype = await ctx.CategoryTypes.FindAsync(type);
-					if (ctype == null)
+			await Context.Retry(async ct =>
+				await Context.Set<Models.CategoryType>().EnsureAsync(
+					new Models.CategoryType
 					{
-						ctx.CategoryTypes.Add(new Models.CategoryType
-						{
-							Name = type
-						});
-						await ctx.SaveChangesAsync();
-					}
-				}
-				return 0;
-			});
+						Name = type
+					})
+				);
 		}
 		async Task EnsureCategory(string type,string name)
 		{
-			await Tasks.Retry(async ct =>
-			{
-				using (var ctx = new AppContext(ConnectionString))
-				{
-					var cat = await ctx.Categories.FindAsync(type,name);
-					if (cat == null)
+			await Context.Retry(async ct =>
+				await Context.Set<Models.Category>().EnsureAsync(
+					new Models.Category
 					{
-						ctx.Categories.Add(new Models.Category
-						{
-							Type=type,
-							Name = name
-						});
-						await ctx.SaveChangesAsync();
-					}
-				}
-				return 0;
-			});
+						Type = type,
+						Name = name
+					})
+				);
 		}
 		async Task EnsureSymbolCategories(string type, string symbol, string[] cats)
 		{
-			await Tasks.Retry(async ct =>
+			await Context.Retry(async ct =>
 			{
-				using (var ctx = new AppContext(ConnectionString))
-				{
-					var dics = await ctx
-						.CategorySymbols
-						.Where(cs => cs.Type == type && cs.Symbol == symbol)
-						.ToDictionaryAsync(cs=>cs.Category);
-
-					foreach (var p in dics)
-						if (!cats.Any(c => c == p.Key))
-							ctx.CategorySymbols.Remove(p.Value);
-					foreach (var cat in cats)
-						if (!dics.ContainsKey(cat))
-							ctx.CategorySymbols.Add(
-								new Models.CategorySymbol
-								{
-									Category = cat,
-									Symbol = symbol,
-									Type = type
-								});
-					await ctx.SaveChangesAsync();
-				}
+				var set = Context.Set<Models.CategorySymbol>();
+				set.Merge(
+					await set.LoadListAsync(cs => cs.Type == type && cs.Symbol == symbol),
+					cats,
+					(cs, e) => cs.Category == e,
+					e => new Models.CategorySymbol
+					{
+						Category = e,
+						Symbol = symbol,
+						Type = type
+					}
+					);
+				await Context.SaveChangesAsync();
 				return 0;
 			});
 		}

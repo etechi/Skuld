@@ -9,7 +9,7 @@ using System.Text.RegularExpressions;
 
 namespace Skuld.DataProviders.Sina
 {
-	public class SinaSymbolCategoryDigger
+	public class SinaSymbolCategoryDigger : DataProviders.ISymbolCategoryDigger
 	{
 		static Regex RegHtmlClear = new Regex("<[^>]+>");
 		public async Task<Dictionary<string,string[]>> Dig(Symbol symbol)

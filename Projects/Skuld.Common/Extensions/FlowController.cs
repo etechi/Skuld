@@ -13,48 +13,43 @@ namespace SF
 		int _CurrentThreadCount;
 		public int CurrentThreadCount => _CurrentThreadCount;
 		public int WaitingCount => WaitQueue.Count;
-		Queue<Action> WaitQueue { get; } = new Queue<Action>();
-		public TimeSpan UnitTime { get; }
-		public FlowController(int ThreadCount, TimeSpan UnitTime)
+		Queue<TaskCompletionSource<int>> WaitQueue { get; } = new Queue<TaskCompletionSource<int>>();
+		public FlowController(int ThreadCount)
 		{
 			this.ThreadCount = ThreadCount;
-			this.UnitTime = UnitTime;
 		}
-		public IObservable<TimeSpan> Next(int index)
+		public Task Wait()
 		{
 			lock (WaitQueue)
 			{
 				if (_CurrentThreadCount < ThreadCount)
 				{
 					_CurrentThreadCount++;
-					return new TimeSpan[] { }.ToObservable();
+					return Task.CompletedTask;
 				}
-				return Observable.Create<TimeSpan>(o =>
-				{
-					lock (WaitQueue)
-					{
-						WaitQueue.Enqueue(() =>
-						{
-							//o.OnNext(new TimeSpan(UnitTime.Ticks * index));
-							o.OnCompleted();
-						});
-						return Disposable.Empty;
-					}
-				});
+				var tcs = new TaskCompletionSource<int>();
+				WaitQueue.Enqueue(tcs);
+				return tcs.Task;
 			}
 		}
+		
 		public void Complete()
 		{
+			TaskCompletionSource<int> tcs;
 			lock (WaitQueue)
 			{
-				if (WaitQueue.Count > 0)
+				if (WaitQueue.Count == 0)
 				{
-					var o = WaitQueue.Dequeue();
-					o();
+					_CurrentThreadCount--;
 					return;
 				}
-				_CurrentThreadCount--;
+				tcs = WaitQueue.Dequeue();
 			}
+			try
+			{
+				tcs.TrySetResult(0);
+			}
+			catch { }
 		}
 	}
 }

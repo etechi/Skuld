@@ -13,6 +13,16 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Skuld.DataStorages.Entity",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Skuld.DataSync", "Skuld.DataSync\Skuld.DataSync.csproj", "{361286BB-3AE0-4B89-A949-9BDFA032F0D5}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SF", "SF", "{4BB22177-593A-4FFE-8564-B2CF31E508D3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SF.Core.net46", "..\..\ServiceFramework\Projects\Core\SF.Core\SF.Core.net46.csproj", "{41D9AE65-A06C-4BE9-B53E-69707D9157C6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SF.Abstractions.net46", "..\..\ServiceFramework\Projects\Core\SF.Abstractions\SF.Abstractions.net46.csproj", "{69691EF2-2EFF-4E50-AA49-93E9FDC5C34B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SF.CoreServices.net46", "..\..\ServiceFramework\Projects\Core\SF.CoreServices\SF.CoreServices.net46.csproj", "{F97B3793-2E2E-41E8-817A-CF34232CDFCC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SF.Data.Entity.EFCore.net46", "..\..\ServiceFramework\Projects\Core\SF.Data.Entity.EFCore\SF.Data.Entity.EFCore.net46.csproj", "{F69BE9A4-1E81-4AA1-9B11-71077DF6CA3D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,8 +49,30 @@ Global
 		{361286BB-3AE0-4B89-A949-9BDFA032F0D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{361286BB-3AE0-4B89-A949-9BDFA032F0D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{361286BB-3AE0-4B89-A949-9BDFA032F0D5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{41D9AE65-A06C-4BE9-B53E-69707D9157C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{41D9AE65-A06C-4BE9-B53E-69707D9157C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{41D9AE65-A06C-4BE9-B53E-69707D9157C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{41D9AE65-A06C-4BE9-B53E-69707D9157C6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{69691EF2-2EFF-4E50-AA49-93E9FDC5C34B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69691EF2-2EFF-4E50-AA49-93E9FDC5C34B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69691EF2-2EFF-4E50-AA49-93E9FDC5C34B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{69691EF2-2EFF-4E50-AA49-93E9FDC5C34B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F97B3793-2E2E-41E8-817A-CF34232CDFCC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F97B3793-2E2E-41E8-817A-CF34232CDFCC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F97B3793-2E2E-41E8-817A-CF34232CDFCC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F97B3793-2E2E-41E8-817A-CF34232CDFCC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F69BE9A4-1E81-4AA1-9B11-71077DF6CA3D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F69BE9A4-1E81-4AA1-9B11-71077DF6CA3D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F69BE9A4-1E81-4AA1-9B11-71077DF6CA3D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F69BE9A4-1E81-4AA1-9B11-71077DF6CA3D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{41D9AE65-A06C-4BE9-B53E-69707D9157C6} = {4BB22177-593A-4FFE-8564-B2CF31E508D3}
+		{69691EF2-2EFF-4E50-AA49-93E9FDC5C34B} = {4BB22177-593A-4FFE-8564-B2CF31E508D3}
+		{F97B3793-2E2E-41E8-817A-CF34232CDFCC} = {4BB22177-593A-4FFE-8564-B2CF31E508D3}
+		{F69BE9A4-1E81-4AA1-9B11-71077DF6CA3D} = {4BB22177-593A-4FFE-8564-B2CF31E508D3}
 	EndGlobalSection
 EndGlobal

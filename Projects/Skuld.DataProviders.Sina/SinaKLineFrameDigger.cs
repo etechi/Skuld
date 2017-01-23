@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using SF;
 namespace Skuld.DataProviders.Sina
 {
-	public class SinaKLineFrameDigger
+	public class SinaKLineFrameDigger : DataProviders.IKLineFrameDigger
 	{
 		public SinaSetting Setting { get; }
 
@@ -79,10 +79,15 @@ namespace Skuld.DataProviders.Sina
 			var url = new Uri(SimpleTemplate.Eval(Setting.TradePriceUrl, args));
 			var str = await url.GetString(Encoding.ASCII);
 			if (string.IsNullOrEmpty(str))
-				return null;
+				return Array.Empty<KLineFrame>();
 
 			var ii = str.IndexOf('[');
+			if (ii == -1)
+				return Array.Empty<KLineFrame>();
 			var ei = str.LastIndexOf(']');
+			if(ei==-1)
+				return Array.Empty<KLineFrame>();
+
 			var frames = Json.Parse<record[]>(str.Substring(ii, ei - ii + 1)).Select(r =>
 				new KLineFrame
 				{
