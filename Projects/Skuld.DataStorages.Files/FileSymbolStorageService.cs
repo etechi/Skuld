@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
-using SF;
 using System.Linq;
+using SF;
+
 namespace Skuld.DataStorages.Files
 {
 	public class FileSymbolStorageService

@@ -6,6 +6,7 @@ using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 using SF;
 using System.Text.RegularExpressions;
+using System.Text;
 
 namespace Skuld.DataProviders.Sina
 {

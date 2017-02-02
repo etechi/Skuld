@@ -12,7 +12,7 @@ using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using SF.Data.Entity.EntityFrameworkCore;
-using SF.DI;
+using SF.Core.DI;
 using Skuld.DataProviders;
 using Skuld.DataStorages;
 
@@ -29,7 +29,7 @@ namespace Skuld.DataSync
 
 		public async Task Execute()
 		{
-			var fc = new SF.FlowController(40);
+			var fc = new FlowController(40);
 			Symbol[] symbols;
 			using (var s = ScopeFactory.CreateScope())
 			{

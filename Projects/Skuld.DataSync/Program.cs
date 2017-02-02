@@ -12,10 +12,11 @@ using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using SF.Data.Entity.EntityFrameworkCore;
-using SF.DI;
+using SF.Core.DI;
 using Skuld.DataProviders;
 using Skuld.DataStorages;
-using SF.Serialization;
+using SF.Core.Serialization;
+using SF.Core.DI.MicrosoftExtensions;
 
 namespace Skuld.DataSync
 {
@@ -56,6 +57,7 @@ namespace Skuld.DataSync
 
 			sc.UseSinaDataProviders();
 			sc.UseEntityDataStorages("Skuld");
+			sc.UseDataContext();
 			sc.UseEFCoreDataEntity<AppContext>();
 
 			services.AddTransient<SyncRunner>();

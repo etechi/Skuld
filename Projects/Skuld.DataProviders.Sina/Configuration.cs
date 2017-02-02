@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using SF;
 using Skuld.DataProviders;
 using Skuld.DataProviders.Sina;
-namespace SF.DI
+namespace SF.Core.DI
 {
 	public static class SinaConfiguration
 	{

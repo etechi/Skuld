@@ -6,6 +6,8 @@ using System.Reactive.Threading.Tasks;
 using System.Text;
 using System.Threading.Tasks;
 using SF;
+using SF.Core;
+
 namespace Skuld.DataProviders.Sina
 {
 	public class SinaKLineFrameDigger : DataProviders.IKLineFrameDigger

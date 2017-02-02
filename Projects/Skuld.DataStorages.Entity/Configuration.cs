@@ -9,7 +9,7 @@ using Skuld.DataStorages;
 using Skuld.DataStorages.Entity;
 using SF.Data.Entity;
 using Skuld.DataStorages.Entity.Models;
-namespace SF.DI
+namespace SF.Core.DI
 {
 	public static class SkuldEntityDataStorageConfiguration
 	{

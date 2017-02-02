@@ -250,17 +250,21 @@
       <Project>{69691ef2-2eff-4e50-aa49-93e9fdc5c34b}</Project>
       <Name>SF.Abstractions.net46</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\ServiceFramework\Projects\Core\SF.CoreServices\SF.CoreServices.net46.csproj">
-      <Project>{f97b3793-2e2e-41e8-817a-cf34232cdfcc}</Project>
-      <Name>SF.CoreServices.net46</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\ServiceFramework\Projects\Core\SF.Core\SF.Core.net46.csproj">
-      <Project>{41d9ae65-a06c-4be9-b53e-69707d9157c6}</Project>
-      <Name>SF.Core.net46</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\..\ServiceFramework\Projects\Core\SF.Data.Entity.EFCore\SF.Data.Entity.EFCore.net46.csproj">
       <Project>{F69BE9A4-1E81-4AA1-9B11-71077DF6CA3D}</Project>
       <Name>SF.Data.Entity.EFCore.net46</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\ServiceFramework\Projects\Core\SF.Extensions\SF.Extensions.net46.csproj">
+      <Project>{ca3cceb7-ad9a-41b1-a06f-483c32b697b7}</Project>
+      <Name>SF.Extensions.net46</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\ServiceFramework\Projects\Core\SF.Implements\SF.Implements.net46.csproj">
+      <Project>{dc7af484-4386-4cb8-ae4c-0f33b18c4add}</Project>
+      <Name>SF.Implements.net46</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\ServiceFramework\Projects\Implements\SF.Core.MicrosoftExtensions\SF.Core.MicrosoftExtensions.net46.csproj">
+      <Project>{958914a9-ccdd-43ff-8620-3588ef099539}</Project>
+      <Name>SF.Core.MicrosoftExtensions.net46</Name>
     </ProjectReference>
     <ProjectReference Include="..\Skuld.Common\Skuld.Common.csproj">
       <Project>{20fde544-c04f-4be4-99fe-56b7da178616}</Project>

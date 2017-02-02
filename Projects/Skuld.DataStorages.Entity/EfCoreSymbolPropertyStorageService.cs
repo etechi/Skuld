@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using SF;
 using System.Linq;
 using SF.Data.Entity;
+using System.Collections.Concurrent;
 
 namespace Skuld.DataStorages.Entity
 {
@@ -32,8 +33,11 @@ namespace Skuld.DataStorages.Entity
 					.ToDictionaryAsync(g => g.Group, g => g.NextUpdateTime.Value);
 
 		}
+		static ConcurrentDictionary<string, string> PropGroupNames = new ConcurrentDictionary<string, string>();
 		async Task EnsurePropertyGroup(string name)
 		{
+			if (PropGroupNames.ContainsKey(name))
+				return;
 			await Context.Retry(async ct =>
 				await Context.Set<Models.PropertyGroup>().EnsureAsync(
 					new Models.PropertyGroup
@@ -41,9 +45,15 @@ namespace Skuld.DataStorages.Entity
 						Name = name
 					})
 			);
+			PropGroupNames.TryAdd(name, name);
 		}
+		static ConcurrentDictionary<string, string> PropItemNames = new ConcurrentDictionary<string, string>();
 		async Task EnsurePropertyItem(string group,string name)
 		{
+			var key = group + ":" + name;
+			if (PropItemNames.ContainsKey(key))
+				return;
+
 			await Context.Retry(async ct =>
 				await Context.Set<Models.PropertyItem>().EnsureAsync(
 					new Models.PropertyItem
@@ -53,6 +63,7 @@ namespace Skuld.DataStorages.Entity
 					})
 				);
 
+			PropItemNames.TryAdd(key, key);
 		}
 		static double? TryParseNumber(string str)
 		{
@@ -63,13 +74,13 @@ namespace Skuld.DataStorages.Entity
 				return v;
 			return null;
 		}
-		async Task MergeGroup(string id, PropertyGroup group, Models.SymbolPropertyGroup existsGroup, DateTime Time)
+		async Task<Models.SymbolPropertyGroup> MergeGroup(string id, PropertyGroup group, Models.SymbolPropertyGroup existsGroup, DateTime Time)
 		{
 			var existsValue = existsGroup == null ? Array.Empty<Models.SymbolPropertyValue>() :
 				await Context.Set<Models.SymbolPropertyValue>().AsQueryable(false).Where(v => v.Symbol == id && v.Group == group.Name).ToArrayAsync();
 
 			if (existsGroup == null)
-				Context.Set<Models.SymbolPropertyGroup>().Add(
+				existsGroup=Context.Set<Models.SymbolPropertyGroup>().Add(
 					new Models.SymbolPropertyGroup
 					{
 						Group = group.Name,
@@ -116,6 +127,7 @@ namespace Skuld.DataStorages.Entity
 							Row=row,
 							Number = TryParseNumber(p.Value)
 						});
+			return existsGroup;
 		}
 		async Task MergeGroupHistory(string id, PropertyGroup group,Models.SymbolPropertyGroupHistory existsGroupHistory,DateTime Time)
 		{
@@ -158,16 +170,15 @@ namespace Skuld.DataStorages.Entity
 							Number = TryParseNumber(p.Value)
 						});
 		}
-		async Task UpdateGroup(Symbol symbol, PropertyGroup group)
+		async Task UpdateGroup(Symbol symbol, PropertyGroup group, Dictionary<string, Models.SymbolPropertyGroup> curGroups)
 		{
-			await Context.Retry(async ct => { 
 				var id = symbol.GetIdent();
-				var curGroup = await Context.Set<Models.SymbolPropertyGroup>().FindAsync(id, group.Name);
+				var curGroup = curGroups.Get(group.Name);
 				//没有当前组，直接新建
 				if (curGroup == null)
 				{
 					var time = group.Time ?? DateTime.Now;
-					await MergeGroup(id, group, null, time);
+					curGroups[group.Name]=await MergeGroup(id, group, null, time);
 					await MergeGroupHistory(id, group, null, time);
 				}
 				//没有时间，需要当前组比较，如果有变化则认为是新的一组数据
@@ -182,21 +193,21 @@ namespace Skuld.DataStorages.Entity
 					if(ops.Length!=vps.Length || ops.Zip(vps,(o,v)=>o.row!=v.row || o.prop!=v.prop || o.value!=v.value).Any(p=>p))
 					{
 						var time = DateTime.Now;
-						await MergeGroup(id, group, curGroup, time);
+						curGroups[group.Name] = await MergeGroup(id, group, curGroup, time);
 						await MergeGroupHistory(id, group, null, time);
 					}
 				}
 				//如果和当前组时间相同，需要合并
 				else if (group.Time.Value == curGroup.Time)
 				{
-					await MergeGroup(id, group, curGroup, group.Time.Value);
+					curGroups[group.Name] = await MergeGroup(id, group, curGroup, group.Time.Value);
 					var existsGroupHistory = await Context.Set<Models.SymbolPropertyGroupHistory>().FindAsync(id, group.Name, group.Time.Value);
 					await MergeGroupHistory(id, group, existsGroupHistory, group.Time.Value);
 				}
 				//如果比当前组时间新，需要新建组
 				else if (group.Time.Value > curGroup.Time)
 				{
-					await MergeGroup(id, group, curGroup, group.Time.Value);
+					curGroups[group.Name] = await MergeGroup(id, group, curGroup, group.Time.Value);
 					await MergeGroupHistory(id, group, null, group.Time.Value);
 				}
 				//如果比当前组时间旧，需要合并或新增历史组
@@ -205,28 +216,42 @@ namespace Skuld.DataStorages.Entity
 					var existsGroupHistory = await Context.Set<Models.SymbolPropertyGroupHistory>().FindAsync(id, group.Name, group.Time.Value);
 					await MergeGroupHistory(id, group, existsGroupHistory, group.Time.Value);
 				}
-				await Context.SaveChangesAsync();
-				return 0;
-			});
-
+				
 		}
-		async Task Update(Symbol symbol, PropertyGroup group)
-		{
-			await EnsurePropertyGroup(group.Name);
-			foreach (var prop in group.Rows.SelectMany(r=>r.Keys).Distinct())
-				await EnsurePropertyItem(group.Name, prop);
-
-			await UpdateGroup(symbol,group);
-		}
+	
 		
 		public async Task Update(Symbol symbol,IObservable<PropertyGroup> groups)
 		{
 			var pgs = new List<PropertyGroup>();
 			await groups.ForEachAsync(g => pgs.Add(g));
 
-			foreach(var gs in pgs.GroupBy(g=>g.Name))
-				foreach(var gi in gs.OrderByDescending(g=>g.Time))
-					await Update(symbol,gi);
+			foreach (var gs in pgs.GroupBy(g => g.Name))
+			{
+				await EnsurePropertyGroup(gs.Key);
+				foreach (var gi in (from g in gs
+								   from r in g.Rows
+								   from k in r.Keys
+								   select k).Distinct()
+								   )
+					await EnsurePropertyItem(gs.Key, gi);
+			}
+
+			await Context.Retry(async ct =>
+			{
+				var id = symbol.GetIdent();
+				var curGroups = await Context
+					.Set<Models.SymbolPropertyGroup>()
+					.AsQueryable(false)
+					.Where(g=>g.Symbol==id)
+					.ToDictionaryAsync(g=>g.Group);
+
+				foreach (var gs in pgs.GroupBy(g => g.Name))
+					foreach (var gi in gs.OrderByDescending(g => g.Time))
+						await UpdateGroup(symbol, gi, curGroups);
+
+				await Context.SaveChangesAsync();
+				return 0;
+			});
 		}
 	}
 }

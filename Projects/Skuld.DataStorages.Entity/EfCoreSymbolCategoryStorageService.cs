@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using SF;
 using System.Linq;
 using SF.Data.Entity;
+using System.Collections.Concurrent;
 
 namespace Skuld.DataStorages.Entity
 {
@@ -15,8 +16,12 @@ namespace Skuld.DataStorages.Entity
 		{
 			this.Context = Context;
 		}
+		static ConcurrentDictionary<string, string> TypeNames = new ConcurrentDictionary<string, string>();
+
 		async Task EnsureCategoryType(string type)
 		{
+			if (TypeNames.ContainsKey(type))
+				return;
 			await Context.Retry(async ct =>
 				await Context.Set<Models.CategoryType>().EnsureAsync(
 					new Models.CategoryType
@@ -24,9 +29,14 @@ namespace Skuld.DataStorages.Entity
 						Name = type
 					})
 				);
+			TypeNames.TryAdd(type, type);
 		}
+		static ConcurrentDictionary<string, string> CatNames = new ConcurrentDictionary<string, string>();
 		async Task EnsureCategory(string type,string name)
 		{
+			var key = type + ":" + name;
+			if (CatNames.ContainsKey(key))
+				return;
 			await Context.Retry(async ct =>
 				await Context.Set<Models.Category>().EnsureAsync(
 					new Models.Category
@@ -35,39 +45,38 @@ namespace Skuld.DataStorages.Entity
 						Name = name
 					})
 				);
+			CatNames.TryAdd(key, key);
 		}
-		async Task EnsureSymbolCategories(string type, string symbol, string[] cats)
+
+		public async Task Update(Symbol symbol,Dictionary<string,string[]> categories)
 		{
+			foreach (var p in categories)
+			{
+				await EnsureCategoryType(p.Key);
+				foreach (var cat in p.Value)
+					await EnsureCategory(p.Key, cat);
+			}
+
 			await Context.Retry(async ct =>
 			{
 				var set = Context.Set<Models.CategorySymbol>();
+				var id = symbol.GetIdent();
 				set.Merge(
-					await set.LoadListAsync(cs => cs.Type == type && cs.Symbol == symbol),
-					cats,
-					(cs, e) => cs.Category == e,
+					await set.LoadListAsync(cs => cs.Symbol == id),
+					from p in categories
+					from v in p.Value
+					select new { type = p.Key, cat = v },
+					(cs, e) => cs.Category == e.cat && cs.Type==e.type,
 					e => new Models.CategorySymbol
 					{
-						Category = e,
-						Symbol = symbol,
-						Type = type
+						Category = e.cat,
+						Symbol = id,
+						Type = e.type
 					}
 					);
 				await Context.SaveChangesAsync();
 				return 0;
 			});
-		}
-		async Task Update(string type, string[] cats,string symbol)
-		{
-			await EnsureCategoryType(type);
-			foreach (var cat in cats)
-				await EnsureCategory(type, cat);
-			await EnsureSymbolCategories(type, symbol, cats);
-		}
-		public async Task Update(Symbol symbol,Dictionary<string,string[]> categories)
-		{
-			foreach (var pair in categories) {
-				await Update(pair.Key, pair.Value, symbol.Scope.ScopeCode + symbol.Code);
-			}
 		}
 	}
 }

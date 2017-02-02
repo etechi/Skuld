@@ -63,9 +63,13 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\ServiceFramework\Projects\Core\SF.Core\SF.Core.net46.csproj">
-      <Project>{41d9ae65-a06c-4be9-b53e-69707d9157c6}</Project>
-      <Name>SF.Core.net46</Name>
+    <ProjectReference Include="..\..\..\ServiceFramework\Projects\Core\SF.Abstractions\SF.Abstractions.net46.csproj">
+      <Project>{69691ef2-2eff-4e50-aa49-93e9fdc5c34b}</Project>
+      <Name>SF.Abstractions.net46</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\ServiceFramework\Projects\Core\SF.Extensions\SF.Extensions.net46.csproj">
+      <Project>{ca3cceb7-ad9a-41b1-a06f-483c32b697b7}</Project>
+      <Name>SF.Extensions.net46</Name>
     </ProjectReference>
     <ProjectReference Include="..\Skuld.Common\Skuld.Common.csproj">
       <Project>{20fde544-c04f-4be4-99fe-56b7da178616}</Project>

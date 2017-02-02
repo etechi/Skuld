@@ -5,6 +5,8 @@ using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 using SF;
+using System.Text;
+
 namespace Skuld.DataProviders.Sina
 {
 	public class SinaSymbolScanner : DataProviders.ISymbolScanner
