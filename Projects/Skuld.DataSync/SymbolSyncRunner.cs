@@ -11,7 +11,6 @@ using System.Reactive.Disposables;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using SF.Data.Entity.EntityFrameworkCore;
 using SF.Core.DI;
 using Skuld.DataProviders;
 using Skuld.DataStorages;

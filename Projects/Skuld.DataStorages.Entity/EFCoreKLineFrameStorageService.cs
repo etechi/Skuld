@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using SF;
 using SF.Data.Entity;
+using SF.Data.Storage;
 
 namespace Skuld.DataStorages.Entity
 {

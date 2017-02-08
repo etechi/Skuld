@@ -250,10 +250,6 @@
       <Project>{69691ef2-2eff-4e50-aa49-93e9fdc5c34b}</Project>
       <Name>SF.Abstractions.net46</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\ServiceFramework\Projects\Core\SF.Data.Entity.EFCore\SF.Data.Entity.EFCore.net46.csproj">
-      <Project>{F69BE9A4-1E81-4AA1-9B11-71077DF6CA3D}</Project>
-      <Name>SF.Data.Entity.EFCore.net46</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\..\ServiceFramework\Projects\Core\SF.Extensions\SF.Extensions.net46.csproj">
       <Project>{ca3cceb7-ad9a-41b1-a06f-483c32b697b7}</Project>
       <Name>SF.Extensions.net46</Name>
@@ -265,6 +261,10 @@
     <ProjectReference Include="..\..\..\ServiceFramework\Projects\Implements\SF.Core.MicrosoftExtensions\SF.Core.MicrosoftExtensions.net46.csproj">
       <Project>{958914a9-ccdd-43ff-8620-3588ef099539}</Project>
       <Name>SF.Core.MicrosoftExtensions.net46</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\ServiceFramework\Projects\Implements\SF.Data.Storage.EFCore\SF.Data.Storage.EFCore.net46.csproj">
+      <Project>{f69be9a4-1e81-4aa1-9b11-71077df6ca3d}</Project>
+      <Name>SF.Data.Storage.EFCore.net46</Name>
     </ProjectReference>
     <ProjectReference Include="..\Skuld.Common\Skuld.Common.csproj">
       <Project>{20fde544-c04f-4be4-99fe-56b7da178616}</Project>

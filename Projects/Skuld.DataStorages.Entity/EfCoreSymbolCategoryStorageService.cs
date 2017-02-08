@@ -6,6 +6,7 @@ using SF;
 using System.Linq;
 using SF.Data.Entity;
 using System.Collections.Concurrent;
+using SF.Data.Storage;
 
 namespace Skuld.DataStorages.Entity
 {
@@ -62,7 +63,7 @@ namespace Skuld.DataStorages.Entity
 				var set = Context.Set<Models.CategorySymbol>();
 				var id = symbol.GetIdent();
 				set.Merge(
-					await set.LoadListAsync(cs => cs.Symbol == id),
+					await set.QueryAsync(cs => cs.Symbol == id),
 					from p in categories
 					from v in p.Value
 					select new { type = p.Key, cat = v },

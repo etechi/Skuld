@@ -6,6 +6,7 @@ using SF;
 using System.Linq;
 using SF.Data.Entity;
 using System.Collections.Concurrent;
+using SF.Data.Storage;
 
 namespace Skuld.DataStorages.Entity
 {
