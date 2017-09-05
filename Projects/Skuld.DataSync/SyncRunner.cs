@@ -10,17 +10,17 @@ using System.Collections.Generic;
 using System.Reactive.Disposables;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using SF.Core.DI;
 using Skuld.DataProviders;
 using Skuld.DataStorages;
+using SF.Core.ServiceManagement;
 
 namespace Skuld.DataSync
 {
 	class SyncRunner
 	{
-		public IDIScopeFactory ScopeFactory { get; }
-		public SyncRunner(IDIScopeFactory ScopeFactory)
+		public IServiceScopeFactory ScopeFactory { get; }
+		public SyncRunner(IServiceScopeFactory ScopeFactory)
 		{
 			this.ScopeFactory = ScopeFactory;
 
@@ -30,10 +30,10 @@ namespace Skuld.DataSync
 		{
 			var fc = new FlowController(40);
 			Symbol[] symbols;
-			using (var s = ScopeFactory.CreateScope())
+			using (var s = ScopeFactory.CreateServiceScope())
 			{
-				await s.ServiceProvider.GetRequiredService<SymbolSyncRunner>().Execute();
-				symbols = await s.ServiceProvider.GetRequiredService<ISymbolStorageService>().List(null).ToAsyncEnumerable().ToArray();
+				await s.ServiceProvider.Resolve<SymbolSyncRunner>().Execute();
+				symbols = await s.ServiceProvider.Resolve<ISymbolStorageService>().List(null).ToAsyncEnumerable().ToArray();
 			}
 
 			await symbols.ToObservable()
@@ -43,12 +43,12 @@ namespace Skuld.DataSync
 					{
 						try
 						{
-							using (var s = ScopeFactory.CreateScope())
+							using (var s = ScopeFactory.CreateServiceScope())
 							{
 								Console.WriteLine($"dig {symbol} {fc.CurrentThreadCount}/{fc.WaitingCount}");
-								await s.ServiceProvider.GetRequiredService<PriceSyncRunner>().Execute(symbol);
-								await s.ServiceProvider.GetRequiredService<CategorySyncRunner>().Execute(symbol);
-								await s.ServiceProvider.GetRequiredService<PropertySyncRunner>().Execute(symbol);
+								await s.ServiceProvider.Resolve<PriceSyncRunner>().Execute(symbol);
+								await s.ServiceProvider.Resolve<CategorySyncRunner>().Execute(symbol);
+								await s.ServiceProvider.Resolve<PropertySyncRunner>().Execute(symbol);
 								Console.WriteLine($"dig {symbol} done!");
 							}
 						}

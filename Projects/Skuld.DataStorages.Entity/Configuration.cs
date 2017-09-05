@@ -7,19 +7,20 @@ using System.Threading.Tasks;
 using SF;
 using Skuld.DataStorages;
 using Skuld.DataStorages.Entity;
-using SF.Data.Entity;
+using SF.Entities;
+using SF.Data;
 using Skuld.DataStorages.Entity.Models;
-namespace SF.Core.DI
+namespace SF.Core.ServiceManagement
 {
 	public static class SkuldEntityDataStorageConfiguration
 	{
-		public static IDIServiceCollection UseEntityDataStorages(this IDIServiceCollection sc,string TablePrefix)
+		public static IServiceCollection UseEntityDataStorages(this IServiceCollection sc,string TablePrefix)
 		{
-			sc.UseDataModules<Symbol>(TablePrefix);
-			sc.UseDataModules<Category,CategorySymbol,CategoryType>(TablePrefix);
-			sc.UseDataModules<Price>(TablePrefix);
-			sc.UseDataModules<PropertyGroup, PropertyItem>(TablePrefix);
-			sc.UseDataModules<SymbolPropertyGroup, SymbolPropertyGroupHistory, SymbolPropertyValue, SymbolPropertyValueHistory>(TablePrefix);
+			sc.AddDataModules<Symbol>(TablePrefix);
+			sc.AddDataModules<Category,CategorySymbol,CategoryType>(TablePrefix);
+			sc.AddDataModules<Price>(TablePrefix);
+			sc.AddDataModules<PropertyGroup, PropertyItem>(TablePrefix);
+			sc.AddDataModules<SymbolPropertyGroup, SymbolPropertyGroupHistory, SymbolPropertyValue, SymbolPropertyValueHistory>(TablePrefix);
 
 			sc.AddScoped<ISymbolStorageService, EFCoreSymbolStorageService>();
 			sc.AddScoped<IKLineFrameStorageService, EFCoreKLineFrameStorageService>();

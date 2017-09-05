@@ -10,71 +10,105 @@ using System.Collections.Generic;
 using System.Reactive.Disposables;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using SF.Core.DI;
+using SF.Core.ServiceManagement;
 using Skuld.DataProviders;
 using Skuld.DataStorages;
 using SF.Core.Serialization;
-using SF.Core.DI.MicrosoftExtensions;
-using SF.Data.Storage.EntityFrameworkCore;
+using SF.Data.EntityFrameworkCore;
+using System.Data.Common;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.EntityFrameworkCore.Design;
+using System.Diagnostics;
+using Microsoft.Extensions.Logging;
 
 namespace Skuld.DataSync
 {
 	public class AppContext : DbContext
 	{
+		public static string ConnectionString { get; }= @"data source=localhost\SQLEXPRESS;initial catalog=skuld2;user id=sa;pwd=system;MultipleActiveResultSets=True;App=EntityFramework";
 		public AppContext(DbContextOptions<AppContext> options)
 			: base(options)
 		{ }
 
 	}
+	public class AppContextFactory : IDesignTimeDbContextFactory<AppContext>
+	{
+
+		public AppContext CreateDbContext(string[] args)
+		{
+			Debugger.Launch();
+			var sc = new Microsoft.Extensions.DependencyInjection.ServiceCollection();
+			sc.AddLogging(lb => lb.AddDebug().AddFilter(l=>true));
+			return new Startup().ConfigureServices(sc).Resolve<AppContext>();
+		}
+	}
 	public class Startup
 	{
 		// This method gets called by the runtime. Use this method to add services to the container.
-		public IServiceProvider ConfigureServices(IServiceCollection services)
+		public IServiceProvider ConfigureServices(Microsoft.Extensions.DependencyInjection.IServiceCollection services=null)
 		{
-			//if (System.Diagnostics.Debugger.IsAttached == false)
-			//	System.Diagnostics.Debugger.Launch();
-			var connection = @"data source=localhost\SQLEXPRESS;initial catalog=skuld2;user id=sa;pwd=system;MultipleActiveResultSets=True;App=EntityFramework";
+			if (services == null)
+				services = new Microsoft.Extensions.DependencyInjection.ServiceCollection();
+			services.AddMemoryCache();
 			services.AddDbContext<AppContext>(
 				(isp, options) =>
-				options.LoadDataModels(isp).UseSqlServer(connection)
+					options.LoadDataModels(isp).UseSqlServer(isp.Resolve<DbConnection>()),
+				ServiceLifetime.Transient
 				);
 
-			// Add framework services.
-			var sc = services.GetDIServiceCollection();
+			var sc=new SF.Core.ServiceManagement.ServiceCollection();
+			sc.AddServices(services);
+			
 
-			sc.UseNewtonsoftJson();
+			return Net46App.Setup(SF.Core.Hosting.EnvironmentType.Production, null, sc).Build().ServiceProvider;
+			////if (System.Diagnostics.Debugger.IsAttached == false)
+			////	System.Diagnostics.Debugger.Launch();
+			//services.AddDataContext(new SF.Data.DataSourceConfig
+			//{
+			//	ConnectionString = connection
+			//});
+			//services.AddDataEntityProviders();
+			//services.add
+			//services.AddDbContext<AppContext>(
+			//	(isp, options) =>
+			//	options.LoadDataModels(isp).UseSqlServer(connection)
+			//	);
 
-			////sc.AddTransient<IAdd, Add>();
-			//sc.UseMemoryManagedServiceSource();
+			//// Add framework services.
+			//var sc = services.GetDIServiceCollection();
 
-			//var msc = new ManagedServiceCollection(sc);
-			//msc.SetupServices();
-			//msc.UseEFCoreIdentGenerator("App");
-			//msc.UseEFCoreUser("App");
+			//sc.UseNewtonsoftJson();
 
-			//sc.UseServiceMetadata();
+			//////sc.AddTransient<IAdd, Add>();
+			////sc.UseMemoryManagedServiceSource();
 
-			sc.UseSinaDataProviders();
-			sc.UseEntityDataStorages("Skuld");
-			sc.UseDataContext();
-			sc.UseEFCoreDataEntity<AppContext>();
+			////var msc = new ManagedServiceCollection(sc);
+			////msc.SetupServices();
+			////msc.UseEFCoreIdentGenerator("App");
+			////msc.UseEFCoreUser("App");
 
-			services.AddTransient<SyncRunner>();
+			////sc.UseServiceMetadata();
 
-			services.AddScoped<SymbolSyncRunner>();
+			//sc.UseSinaDataProviders();
+			//sc.UseEntityDataStorages("Skuld");
+			//sc.UseDataContext();
+			//sc.UseEFCoreDataEntity<AppContext>();
 
-			services.AddScoped<PriceSyncRunner>();
-			services.AddScoped<CategorySyncRunner>();
-			services.AddScoped<PropertySyncRunner>();
+			//services.AddTransient<SyncRunner>();
 
-			var sp = services.BuildServiceProvider();
-			return sp;
+			//services.AddScoped<SymbolSyncRunner>();
+
+			//services.AddScoped<PriceSyncRunner>();
+			//services.AddScoped<CategorySyncRunner>();
+			//services.AddScoped<PropertySyncRunner>();
+
+			//var sp = services.BuildServiceProvider();
+			//return sp;
 		}
 	}
-	
-	
-	
+
+
+
 	class Program
 	{
 		
@@ -96,9 +130,8 @@ namespace Skuld.DataSync
 		//}
 		static void Main(string[] args)
 		{
-			var sc = new ServiceCollection();
-			var sp=new Startup().ConfigureServices(sc);
-			var runner = sp.GetRequiredService<SyncRunner>();
+			var sp = new Startup().ConfigureServices();
+			var runner = sp.Resolve<SyncRunner>();
 			runner.Execute().Wait();
 		}
 	}

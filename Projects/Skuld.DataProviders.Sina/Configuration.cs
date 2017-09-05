@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 using SF;
 using Skuld.DataProviders;
 using Skuld.DataProviders.Sina;
-namespace SF.Core.DI
+namespace SF.Core.ServiceManagement
 {
 	public static class SinaConfiguration
 	{
-		public static IDIServiceCollection UseSinaDataProviders(this IDIServiceCollection sc,SinaSetting Setting=null)
+		public static IServiceCollection UseSinaDataProviders(this IServiceCollection sc,SinaSetting Setting=null)
 		{
 			sc.AddSingleton(Setting ?? new SinaSetting());
 			sc.AddScoped<ISymbolScanner, SinaSymbolScanner>();

@@ -33,8 +33,8 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -89,13 +89,13 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\ServiceFramework\Projects\Core\SF.Abstractions\SF.Abstractions.net46.csproj">
-      <Project>{69691ef2-2eff-4e50-aa49-93e9fdc5c34b}</Project>
-      <Name>SF.Abstractions.net46</Name>
+    <ProjectReference Include="..\..\..\ServiceFramework\Projects\Core\SF.Abstractions\SF.Abstractions.csproj">
+      <Project>{55beb521-415d-4d84-a861-25fb78d07345}</Project>
+      <Name>SF.Abstractions</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\ServiceFramework\Projects\Core\SF.Extensions\SF.Extensions.net46.csproj">
-      <Project>{ca3cceb7-ad9a-41b1-a06f-483c32b697b7}</Project>
-      <Name>SF.Extensions.net46</Name>
+    <ProjectReference Include="..\..\..\ServiceFramework\Projects\Core\SF.Extensions\SF.Extensions.csproj">
+      <Project>{03ce2c19-5e88-4a81-8c40-63eff33278ab}</Project>
+      <Name>SF.Extensions</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
