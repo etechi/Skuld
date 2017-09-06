@@ -60,37 +60,7 @@ namespace Skuld.DataStorages.Entity
 			};
 		}
 
-		IEnumerable<KLineFrame> ReadKLineFrames(string Path)
-		{
-			if (!System.IO.File.Exists(Path))
-				yield break;
-			using (var fs = new System.IO.FileStream(Path, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.ReadWrite))
-			{
-				using (var r = new System.IO.StreamReader(fs))
-				{
-					for (;;)
-					{
-						var l = r.ReadLine();
-						if (l == null)
-							break;
-						l = l.Trim();
-						if (l.Length == 0)
-							continue;
-						var ts = l.Split(',');
-						yield return new KLineFrame
-						{
-							Time = DateTime.Parse(ts[0]),
-							Open = float.Parse(ts[1]),
-							Close = float.Parse(ts[2]),
-							Low = float.Parse(ts[3]),
-							High = float.Parse(ts[4]),
-							Volume = float.Parse(ts[5]),
-							AdjuestRate = float.Parse(ts[6])
-						};
-					}
-				}
-			}
-		}
+		
 		public IObservable<KLineFrame> Load(SymbolScope Scope, string Code, int Interval, TimeRange TimeRange)
 		{
 			var symbol = new Symbol { Scope = Scope, Code = Code }.GetIdent();

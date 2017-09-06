@@ -2,6 +2,16 @@
 
 namespace Skuld
 {
+	public enum KLineFrameField
+	{
+		Time,
+		Open,
+		Close,
+		High,
+		Low,
+		Volume,
+		AdjuestRate
+	}
 	public class KLineFrame
 	{
 		public DateTime Time { get; set; }
