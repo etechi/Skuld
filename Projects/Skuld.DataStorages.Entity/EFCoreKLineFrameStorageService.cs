@@ -6,20 +6,26 @@ using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using SF;
-using SF.Data.Entity;
-using SF.Data.Storage;
+using SF.Entities;
+using SF.Data;
+using System.Data.Common;
+using Dapper;
+using System.Threading;
 
 namespace Skuld.DataStorages.Entity
 {
 	
 	public class EFCoreKLineFrameStorageService  : IKLineFrameStorageService
 	{
-		public IDataContext Context { get; }
+		public DbConnection Connection { get; }
+		public IDataContext DataContext { get; }
 		public EFCoreKLineFrameStorageService(
-			IDataContext Context
+			DbConnection Connection,
+			IDataContext DataContext
 			)
 		{
-			this.Context = Context;
+			this.DataContext = DataContext;
+			this.Connection = Connection;
 		}
 		
 		class State
@@ -34,7 +40,7 @@ namespace Skuld.DataStorages.Entity
 			DateTime endTime;
 			
 			var id = symbol.GetIdent();
-			endTime = Context.Set<Models.Price>().AsQueryable(true)
+			endTime = DataContext.Set<Models.Price>().AsQueryable(true)
 				.Where(p => p.Symbol == id && p.Interval == Interval)
 				.OrderByDescending(p => p.Time)
 				.Take(1)
@@ -65,7 +71,7 @@ namespace Skuld.DataStorages.Entity
 		{
 			var symbol = new Symbol { Scope = Scope, Code = Code }.GetIdent();
 
-			var frames=Context.Set<Models.Price>().AsQueryable(true)
+			var frames= DataContext.Set<Models.Price>().AsQueryable(true)
 				.Where(p => p.Symbol == symbol && p.Interval == Interval && p.Time >= TimeRange.Begin && p.Time <= TimeRange.End)
 				.OrderBy(p => p.Time)
 				.Select(p => new KLineFrame
@@ -98,11 +104,11 @@ namespace Skuld.DataStorages.Entity
 
 			var ident = Symbol.GetIdent();
 
-			await Context.Retry(async ct =>
+			await TaskUtils.Retry(async ct =>
 			{
-				using (var tran = Context.Engine.BeginTransaction())
+				using (var tran = Connection.BeginTransaction())
 				{
-					var set = Context.Set<Models.Price>();
+					var set = DataContext.Set<Models.Price>();
 					var existsframes = await set.AsQueryable(true)
 						.Where(p => p.Symbol == ident && p.Interval == Interval && p.Time >= minTime)
 						.ToDictionaryAsync(p => p.Time);
@@ -112,38 +118,42 @@ namespace Skuld.DataStorages.Entity
 						Models.Price p;
 						if (!existsframes.TryGetValue(f.Time, out p))
 						{
-							await Context.Engine.ExecuteCommandAsync(
+							await Connection.ExecuteAsync(
 								$"INSERT INTO [{setName}] ([symbol], [interval], [time],[open],[close],[high],[low],[volume], [adjustrate]) " +
-								"VALUES(@p0,@p1,@p2,@p3,@p4,@p5,@p6,@p7,@p8)",
-								ct,
-								ident,
-								Interval,
-								f.Time,
-								f.Open,
-								f.Close,
-								f.High,
-								f.Low,
-								f.Volume,
-								f.AdjuestRate
+								"VALUES(@symbol,@interval,@time,@open,@close,@high,@low,@volume,@adjustrate)",
+								new
+								{
+									ident = Symbol,
+									interval = Interval,
+									time = f.Time,
+									open = f.Open,
+									close = f.Close,
+									high = f.High,
+									low = f.Low,
+									volume = f.Volume,
+									adjustrate = f.AdjuestRate
+								}
 							);
 						}
 						else if (p.Open != f.Open || p.Close != f.Close || p.High != f.High || p.Low != f.Low ||
 							p.Volume != f.Volume || p.AdjustRate != f.AdjuestRate
 							)
-							await Context.Engine.ExecuteCommandAsync(
+							await Connection.ExecuteAsync(
 								$"update [{setName}] set " +
-								"[open]=@p0,[close]=@p1,[high]=@p2,[low]=@p3,[volume]=@p4, [adjustrate]=@p5 " +
-								"where [symbol]=@p6 and [interval]=@p7 and [time]=@p8",
-								ct,
-								f.Open,
-								f.Close,
-								f.High,
-								f.Low,
-								f.Volume,
-								f.AdjuestRate,
-								ident,
-								Interval,
-								f.Time
+								"[open]=@open,[close]=@close,[high]=@high,[low]=@low,[volume]=@volume, [adjustrate]=@adjustrate " +
+								"where [symbol]=@symbol and [interval]=@interval and [time]=@time",
+								new
+								{
+									open = f.Open,
+									close = f.Close,
+									high = f.High,
+									low = f.Low,
+									volume = f.Volume,
+									adjustrate = f.AdjuestRate,
+									symbol = ident,
+									interval = Interval,
+									time = f.Time
+								}
 								);
 					}
 					if (ct.IsCancellationRequested)

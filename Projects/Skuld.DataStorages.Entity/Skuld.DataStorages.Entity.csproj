@@ -31,6 +31,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Dapper, Version=1.50.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Dapper.1.50.2\lib\net451\Dapper.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
@@ -78,13 +81,13 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\ServiceFramework\Projects\Core\SF.Abstractions\SF.Abstractions.net46.csproj">
-      <Project>{69691ef2-2eff-4e50-aa49-93e9fdc5c34b}</Project>
-      <Name>SF.Abstractions.net46</Name>
+    <ProjectReference Include="..\..\..\ServiceFramework\Projects\Core\SF.Abstractions\SF.Abstractions.csproj">
+      <Project>{55beb521-415d-4d84-a861-25fb78d07345}</Project>
+      <Name>SF.Abstractions</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\ServiceFramework\Projects\Core\SF.Extensions\SF.Extensions.net46.csproj">
-      <Project>{ca3cceb7-ad9a-41b1-a06f-483c32b697b7}</Project>
-      <Name>SF.Extensions.net46</Name>
+    <ProjectReference Include="..\..\..\ServiceFramework\Projects\Core\SF.Extensions\SF.Extensions.csproj">
+      <Project>{03ce2c19-5e88-4a81-8c40-63eff33278ab}</Project>
+      <Name>SF.Extensions</Name>
     </ProjectReference>
     <ProjectReference Include="..\Skuld.Common\Skuld.Common.csproj">
       <Project>{20fde544-c04f-4be4-99fe-56b7da178616}</Project>

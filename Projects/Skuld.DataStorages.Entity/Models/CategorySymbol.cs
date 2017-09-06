@@ -1,5 +1,5 @@
-﻿using SF.Data.Entity;
-using SF.Data.Storage;
+﻿using SF.Entities;
+using SF.Data;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;

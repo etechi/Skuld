@@ -4,9 +4,9 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using SF;
 using System.Linq;
-using SF.Data.Entity;
+using SF.Entities;
+using SF.Data;
 using System.Collections.Concurrent;
-using SF.Data.Storage;
 
 namespace Skuld.DataStorages.Entity
 {
