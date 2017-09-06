@@ -106,62 +106,60 @@ namespace Skuld.DataStorages.Entity
 
 			await TaskUtils.Retry(async ct =>
 			{
-				using (var tran = Connection.BeginTransaction())
-				{
-					var set = DataContext.Set<Models.Price>();
-					var existsframes = await set.AsQueryable(true)
-						.Where(p => p.Symbol == ident && p.Interval == Interval && p.Time >= minTime)
-						.ToDictionaryAsync(p => p.Time);
-					var setName = set.Metadata.EntitySetName;
-					foreach (var f in frames.Values)
-					{
-						Models.Price p;
-						if (!existsframes.TryGetValue(f.Time, out p))
-						{
-							await Connection.ExecuteAsync(
-								$"INSERT INTO [{setName}] ([symbol], [interval], [time],[open],[close],[high],[low],[volume], [adjustrate]) " +
-								"VALUES(@symbol,@interval,@time,@open,@close,@high,@low,@volume,@adjustrate)",
-								new
-								{
-									ident = Symbol,
-									interval = Interval,
-									time = f.Time,
-									open = f.Open,
-									close = f.Close,
-									high = f.High,
-									low = f.Low,
-									volume = f.Volume,
-									adjustrate = f.AdjuestRate
-								}
-							);
-						}
-						else if (p.Open != f.Open || p.Close != f.Close || p.High != f.High || p.Low != f.Low ||
-							p.Volume != f.Volume || p.AdjustRate != f.AdjuestRate
-							)
-							await Connection.ExecuteAsync(
-								$"update [{setName}] set " +
-								"[open]=@open,[close]=@close,[high]=@high,[low]=@low,[volume]=@volume, [adjustrate]=@adjustrate " +
-								"where [symbol]=@symbol and [interval]=@interval and [time]=@time",
-								new
-								{
-									open = f.Open,
-									close = f.Close,
-									high = f.High,
-									low = f.Low,
-									volume = f.Volume,
-									adjustrate = f.AdjuestRate,
-									symbol = ident,
-									interval = Interval,
-									time = f.Time
-								}
-								);
-					}
-					if (ct.IsCancellationRequested)
-						tran.Rollback();
-					else
-						tran.Commit();
-
-				}
+				await DataContext.UseTransaction("add prices", async (tran) =>
+				 {
+					 var set = DataContext.Set<Models.Price>();
+					 var existsframes = await set.AsQueryable(true)
+						 .Where(p => p.Symbol == ident && p.Interval == Interval && p.Time >= minTime)
+						 .ToDictionaryAsync(p => p.Time);
+					 var setName = set.Metadata.EntitySetName;
+					 foreach (var f in frames.Values)
+					 {
+						 Models.Price p;
+						 if (!existsframes.TryGetValue(f.Time, out p))
+						 {
+							 await Connection.ExecuteAsync(
+								 $"INSERT INTO [{setName}] ([symbol], [interval], [time],[open],[close],[high],[low],[volume], [adjustrate]) " +
+								 "VALUES(@symbol,@interval,@time,@open,@close,@high,@low,@volume,@adjustrate)",
+								 new
+								 {
+									 symbol = ident,
+									 interval = Interval,
+									 time = f.Time,
+									 open = f.Open,
+									 close = f.Close,
+									 high = f.High,
+									 low = f.Low,
+									 volume = f.Volume,
+									 adjustrate = f.AdjuestRate
+								 },
+								 tran
+							 );
+						 }
+						 else if (p.Open != f.Open || p.Close != f.Close || p.High != f.High || p.Low != f.Low ||
+							 p.Volume != f.Volume || p.AdjustRate != f.AdjuestRate
+							 )
+							 await Connection.ExecuteAsync(
+								 $"update [{setName}] set " +
+								 "[open]=@open,[close]=@close,[high]=@high,[low]=@low,[volume]=@volume, [adjustrate]=@adjustrate " +
+								 "where [symbol]=@symbol and [interval]=@interval and [time]=@time",
+								 new
+								 {
+									 open = f.Open,
+									 close = f.Close,
+									 high = f.High,
+									 low = f.Low,
+									 volume = f.Volume,
+									 adjustrate = f.AdjuestRate,
+									 symbol = ident,
+									 interval = Interval,
+									 time = f.Time
+								 },
+								 tran
+								 );
+					 }
+					 return 0;
+				 });
 				return 0;
 			});
 		}

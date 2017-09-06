@@ -221,6 +221,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AppCore.cs" />
+    <Compile Include="Migrations\20170906032743_init.cs" />
+    <Compile Include="Migrations\20170906032743_init.designer.cs">
+      <DependentUpon>20170906032743_init.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\AppContextModelSnapshot.cs" />
     <Compile Include="SyncRunner.cs" />
     <Compile Include="SymbolSyncRunner.cs" />
     <Compile Include="PropertySyncRunner.cs" />

@@ -28,7 +28,7 @@ namespace Skuld.DataSync
 
 		public async Task Execute()
 		{
-			var fc = new FlowController(40);
+			var fc = new FlowController(1);
 			Symbol[] symbols;
 			using (var s = ScopeFactory.CreateServiceScope())
 			{

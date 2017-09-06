@@ -68,7 +68,6 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Evaluators\IEvaluator.cs" />
     <Compile Include="PropertyGroup.cs" />
     <Compile Include="KLineFrame.cs" />
     <Compile Include="KLineFrameRange.cs" />
@@ -98,6 +97,9 @@
       <Project>{03ce2c19-5e88-4a81-8c40-63eff33278ab}</Project>
       <Name>SF.Extensions</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Evaluators\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

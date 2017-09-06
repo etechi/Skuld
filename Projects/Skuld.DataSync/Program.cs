@@ -25,7 +25,7 @@ namespace Skuld.DataSync
 {
 	public class AppContext : DbContext
 	{
-		public static string ConnectionString { get; }= @"data source=localhost\SQLEXPRESS;initial catalog=skuld2;user id=sa;pwd=system;MultipleActiveResultSets=True;App=EntityFramework";
+		public static string ConnectionString { get; }= @"data source=localhost\SQLEXPRESS;initial catalog=skuld3;user id=sa;pwd=system;MultipleActiveResultSets=True;App=EntityFramework";
 		public AppContext(DbContextOptions<AppContext> options)
 			: base(options)
 		{ }
@@ -38,8 +38,11 @@ namespace Skuld.DataSync
 		{
 			Debugger.Launch();
 			var sc = new Microsoft.Extensions.DependencyInjection.ServiceCollection();
-			sc.AddLogging(lb => lb.AddDebug().AddFilter(l=>true));
-			return new Startup().ConfigureServices(sc).Resolve<AppContext>();
+			//sc.AddLogging(lb => lb.AddDebug().AddFilter(l=>true));
+			var sp = new Startup().ConfigureServices(sc);
+			var ctx= sp.Resolve<AppContext>();
+
+			return ctx;
 		}
 	}
 	public class Startup
@@ -49,7 +52,7 @@ namespace Skuld.DataSync
 		{
 			if (services == null)
 				services = new Microsoft.Extensions.DependencyInjection.ServiceCollection();
-			services.AddMemoryCache();
+			//services.AddMemoryCache();
 			services.AddDbContext<AppContext>(
 				(isp, options) =>
 					options.LoadDataModels(isp).UseSqlServer(isp.Resolve<DbConnection>()),
