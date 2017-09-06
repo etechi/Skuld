@@ -68,7 +68,7 @@ namespace Skuld.DataProviders.Sina
 			public Dictionary<string, string> data { get; set; }
 
 		}
-		async Task<KLineFrame[]> GetKLineFrame(string symbol, int scale, int count, bool adjuest)
+		async Task<KLineFrame[]> GetStockAndIndexKLineFrame(string symbol, int scale, int count, bool adjuest)
 		{
 			//public string AdjuestPriceUrl { get; private set; } = "http://finance.sina.com.cn/realstock/newcompany/{SYMBOL}/phfq.js";
 			//public string TradePriceUrl { get; private set; } = "http://money.finance.sina.com.cn/quotes_service/api/jsonp_v2.php/a/CN_MarketData.getKLineData?symbol={SYMBOL}&scale={SCALE}&ma=no&datalen={COUNT}";
@@ -78,7 +78,7 @@ namespace Skuld.DataProviders.Sina
 				{ "SYMBOL", symbol }
 				};
 
-			var url = new Uri(SimpleTemplate.Eval(Setting.TradePriceUrl, args));
+			var url = new Uri(SimpleTemplate.Eval(Setting.StockAndIndexTradePriceUrl, args));
 			var str = await url.GetString(Encoding.ASCII);
 			if (string.IsNullOrEmpty(str))
 				return Array.Empty<KLineFrame>();
@@ -106,7 +106,85 @@ namespace Skuld.DataProviders.Sina
 			var re = frames.ToArray();
 			if (adjuest)
 			{
-				var adjurl = new Uri(SimpleTemplate.Eval(Setting.AdjuestPriceUrl, args));
+				var adjurl = new Uri(SimpleTemplate.Eval(Setting.StockAndIndexAdjuestPriceUrl, args));
+				var adjstr = await adjurl.GetString(Encoding.ASCII);
+				if (adjstr == null)
+					return null;
+
+				var i = adjstr.IndexOf('{');
+				var e = adjstr.LastIndexOf('}');
+				var adj = Json.Parse<adjresult>(adjstr.Substring(i, e - i + 1));
+				var dic = adj.data;
+
+
+				var last_adj_rate = 1f;
+				foreach (var f in re)
+				{
+					string spr;
+					var key = f.Time.ToString("_yyyy_MM_dd");
+					if (dic.TryGetValue(key, out spr))
+					{
+						var pr = float.Parse(spr);
+						last_adj_rate = f.AdjuestRate = pr / f.Close;
+					}
+					else
+						f.AdjuestRate = last_adj_rate;
+				}
+			}
+			return re;
+
+		}
+		class FundRecord
+		{
+			public string fbrq { get; set; }
+			public string jjjz { get; set; }
+			public string ljjz { get; set; }
+		}
+
+
+		async Task<KLineFrame[]> GetFundKLineFrame(string symbol, int scale, int count, bool adjuest)
+		{
+			//public string AdjuestPriceUrl { get; private set; } = "http://finance.sina.com.cn/realstock/newcompany/{SYMBOL}/phfq.js";
+			//public string FundPriceUrl { get; set; } = "http://stock.finance.sina.com.cn/fundInfo/api/openapi.php/CaihuiFundInfoService.getNav?callback=abc&symbol=519690&datefrom=&dateto=&page={PAGE}&num={COUNT}";
+			var args = new Dictionary<string, string> {
+				{ "PAGE", "1" },
+				{ "COUNT", count.ToString() },
+				{ "SYMBOL", symbol }
+				};
+
+			var url = new Uri(SimpleTemplate.Eval(Setting.StockAndIndexTradePriceUrl, args));
+			var str = await url.GetString(Encoding.ASCII);
+			if (string.IsNullOrEmpty(str))
+				return Array.Empty<KLineFrame>();
+			str = str.Substring("\"data\":[{", -2, "}]", 2);
+			
+
+			var frames = Json.Parse<FundRecord[]>(str).Select(r =>
+			{
+				var price = r.jjjz.ToFloat();
+				var AdjuestRate = r.ljjz.ToFloat() / price;
+				var time = r.fbrq.ToDateTime(
+					r.fbrq.Length == 10 ? "yyyy-MM-dd" : "yyyy-MM-dd HH:mm:ss",
+					System.Globalization.DateTimeStyles.AssumeLocal
+					);
+
+				new KLineFrame
+				{
+					Close = price,
+					High = price,
+					Low = price,
+					Open = price,
+					Volume = 0,
+					AdjuestRate = AdjuestRate,
+					Time = time
+				};
+			}
+			);
+
+			var re = frames.ToArray();
+			if (adjuest)
+			{
+				var adjurl = new Uri(SimpleTemplate.Eval(Setting.StockAndIndexAdjuestPriceUrl, args));
 				var adjstr = await adjurl.GetString(Encoding.ASCII);
 				if (adjstr == null)
 					return null;
@@ -160,7 +238,7 @@ namespace Skuld.DataProviders.Sina
 			}
 			else
 				throw new NotSupportedException();
-			var frames = GetKLineFrame(symbol, scale, count, Symbol.Scope.Type == SymbolType.Stock);
+			var frames = GetStockAndIndexKLineFrame(symbol, scale, count, Symbol.Scope.Type == SymbolType.Stock);
 			if (frames == null)
 				return Observable.Empty<KLineFrame>();
 			return from rs in frames.ToObservable()

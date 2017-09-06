@@ -10,16 +10,22 @@ namespace Skuld.DataProviders.Sina
 		[Display(Name = "所有股票基本数据")]
 		public string ALL_STOCK_BASICS_FILE { get;  set; } = "http://{OSS}/static/all.csv";
 
-		[Display(Name = "代码扫描URL")]
+		[Display(Name = "股票/指数代码扫描URL")]
 		//public string SymbolScanUrl { get; private set; } = "http://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/Market_Center.getHQNodeData?page={PAGE}&num={COUNT}&sort=changepercent&asc=0&node={NODE}";
-		public string SymbolScanUrl { get;  set; } = "http://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/Market_Center.getHQNodeData?page={PAGE}&num={COUNT}&sort=symbol&asc=1&node={NODE}";
+		public string StockAndIndexScanUrl { get;  set; } = "http://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/Market_Center.getHQNodeData?page={PAGE}&num={COUNT}&sort=symbol&asc=1&node={NODE}";
+
+
+		[Display(Name = "基金代码扫描URL")]
+		public string FundSymbolScanUrl { get; set; } = "http://vip.stock.finance.sina.com.cn/fund_center/data/jsonp.php/Begin/NetValueReturn_Service.NetValueReturnOpen?page={PAGE}&num={COUNT}&sort=form_year&asc=0&ccode=&type2=0&type3=";
+		[Display(Name = "基金价格")]
+		public string FundPriceUrl { get; set; } = "http://stock.finance.sina.com.cn/fundInfo/api/openapi.php/CaihuiFundInfoService.getNav?callback=abc&symbol={SYMBOL}&datefrom=&dateto=&page={PAGE}&num={COUNT}";
 
 		//复权因子
-		[Display(Name = "后复权价格")]
-		public string AdjuestPriceUrl { get;  set; } = "http://finance.sina.com.cn/realstock/newcompany/{SYMBOL}/phfq.js";
+		[Display(Name = "股票/指数后复权价格")]
+		public string StockAndIndexAdjuestPriceUrl { get;  set; } = "http://finance.sina.com.cn/realstock/newcompany/{SYMBOL}/phfq.js";
 		//行情
-		[Display(Name = "交易价格")]
-		public string TradePriceUrl { get;  set; } = "http://money.finance.sina.com.cn/quotes_service/api/jsonp_v2.php/a/CN_MarketData.getKLineData?symbol={SYMBOL}&scale={SCALE}&ma=no&datalen={COUNT}";
+		[Display(Name = "股票/指数交易价格")]
+		public string StockAndIndexTradePriceUrl { get;  set; } = "http://money.finance.sina.com.cn/quotes_service/api/jsonp_v2.php/a/CN_MarketData.getKLineData?symbol={SYMBOL}&scale={SCALE}&ma=no&datalen={COUNT}";
 
 
 		//上市时间，基本信息
