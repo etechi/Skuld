@@ -108,8 +108,8 @@ namespace Skuld.DataSync
 
 		static void ConfigServices(IServiceCollection Services, EnvironmentType EnvType)
 		{
-			Services.AddSystemMemoryCache();
-			Services.AddSystemDrawing();
+			//Services.AddSystemMemoryCache();
+			//Services.AddSystemDrawing();
 			Services.AddEFCoreDataEntity((sp,conn) => sp.Resolve<AppContext>());
 			Services.AddConsoleDefaultFilePathStructure();
 

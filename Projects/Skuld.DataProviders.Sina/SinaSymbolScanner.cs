@@ -30,6 +30,8 @@ namespace Skuld.DataProviders.Sina
 		}
 		IObservable<StockAndIndexRecord> GetAllStockAndIndexRecords(string node)
 		{
+			//return Observable.Empty<StockAndIndexRecord>();
+
 			var pages = Enumerable.Range(1, 100)
 				.ToObservable()
 				.Delay(i => Observable.Timer(TimeSpan.FromMilliseconds(i * 2 * 100)))
@@ -47,7 +49,7 @@ namespace Skuld.DataProviders.Sina
 		class FundRecord
 		{
 			public string symbol { get; set; }
-			public string sname { get; set; }
+			public string name { get; set; }
 		}
 		async Task<FundRecord[]> GetFund(int page)
 		{
@@ -111,7 +113,7 @@ namespace Skuld.DataProviders.Sina
 				{
 					Scope= fund,
 					Code=r.symbol,
-					Name=r.sname
+					Name=r.name
 				});
 			return a.Concat(i).Concat(f);
 		}

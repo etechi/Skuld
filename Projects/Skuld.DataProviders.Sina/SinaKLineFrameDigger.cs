@@ -142,7 +142,7 @@ namespace Skuld.DataProviders.Sina
 		}
 
 
-		async Task<KLineFrame[]> GetFundKLineFrame(string symbol, int scale, int count, bool adjuest)
+		async Task<KLineFrame[]> GetFundKLineFrame(string symbol, int scale, int count)
 		{
 			//public string AdjuestPriceUrl { get; private set; } = "http://finance.sina.com.cn/realstock/newcompany/{SYMBOL}/phfq.js";
 			//public string FundPriceUrl { get; set; } = "http://stock.finance.sina.com.cn/fundInfo/api/openapi.php/CaihuiFundInfoService.getNav?callback=abc&symbol=519690&datefrom=&dateto=&page={PAGE}&num={COUNT}";
@@ -152,12 +152,13 @@ namespace Skuld.DataProviders.Sina
 				{ "SYMBOL", symbol }
 				};
 
-			var url = new Uri(SimpleTemplate.Eval(Setting.StockAndIndexTradePriceUrl, args));
+			var url = new Uri(SimpleTemplate.Eval(Setting.FundPriceUrl, args));
 			var str = await url.GetString(Encoding.ASCII);
 			if (string.IsNullOrEmpty(str))
 				return Array.Empty<KLineFrame>();
 			str = str.Substring("\"data\":[{", -2, "}]", 2);
-			
+			if (str.IsNullOrEmpty())
+				return Array.Empty<KLineFrame>();
 
 			var frames = Json.Parse<FundRecord[]>(str).Select(r =>
 			{
@@ -168,7 +169,7 @@ namespace Skuld.DataProviders.Sina
 					System.Globalization.DateTimeStyles.AssumeLocal
 					);
 
-				new KLineFrame
+				return new KLineFrame
 				{
 					Close = price,
 					High = price,
@@ -182,33 +183,6 @@ namespace Skuld.DataProviders.Sina
 			);
 
 			var re = frames.ToArray();
-			if (adjuest)
-			{
-				var adjurl = new Uri(SimpleTemplate.Eval(Setting.StockAndIndexAdjuestPriceUrl, args));
-				var adjstr = await adjurl.GetString(Encoding.ASCII);
-				if (adjstr == null)
-					return null;
-
-				var i = adjstr.IndexOf('{');
-				var e = adjstr.LastIndexOf('}');
-				var adj = Json.Parse<adjresult>(adjstr.Substring(i, e - i + 1));
-				var dic = adj.data;
-
-
-				var last_adj_rate = 1f;
-				foreach (var f in re)
-				{
-					string spr;
-					var key = f.Time.ToString("_yyyy_MM_dd");
-					if (dic.TryGetValue(key, out spr))
-					{
-						var pr = float.Parse(spr);
-						last_adj_rate = f.AdjuestRate = pr / f.Close;
-					}
-					else
-						f.AdjuestRate = last_adj_rate;
-				}
-			}
 			return re;
 
 		}
@@ -219,10 +193,6 @@ namespace Skuld.DataProviders.Sina
 			DateTime EndTime
 		   )
 		{
-			if (Symbol.Scope.ScopeCode != "sh" && Symbol.Scope.ScopeCode != "sz")
-				throw new NotSupportedException();
-
-			var symbol = Symbol.Scope.ScopeCode + Symbol.Code;
 			int scale;
 			int count;
 			var curTime = DateTime.Now;
@@ -238,9 +208,20 @@ namespace Skuld.DataProviders.Sina
 			}
 			else
 				throw new NotSupportedException();
-			var frames = GetStockAndIndexKLineFrame(symbol, scale, count, Symbol.Scope.Type == SymbolType.Stock);
+			Task<KLineFrame[]> frames = null;
+			if (Symbol.Scope.ScopeCode == "sh" || Symbol.Scope.ScopeCode == "sz")
+			{
+				var symbol = Symbol.Scope.ScopeCode + Symbol.Code;
+				frames = GetStockAndIndexKLineFrame(symbol, scale, count, Symbol.Scope.Type == SymbolType.Stock);
+			}
+			else if (Symbol.Scope.Type == SymbolType.Fund)
+			{
+				frames = GetFundKLineFrame(Symbol.Code, scale, count);
+			}
+
 			if (frames == null)
 				return Observable.Empty<KLineFrame>();
+
 			return from rs in frames.ToObservable()
 				   from r in rs
 				   where r.Time >= BeginTime && r.Time <= EndTime

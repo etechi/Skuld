@@ -1,84 +1,54 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{8326A449-2550-42E3-BAAD-463FA8BADB0E}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Skuld.DataStorages.Files</RootNamespace>
-    <AssemblyName>Skuld.DataStorages.Files</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
+    <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Reactive.Core, Version=3.0.3000.0, Culture=neutral, PublicKeyToken=94bc3704cddfc263, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Reactive.Core.3.1.1\lib\net46\System.Reactive.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Reactive.Interfaces, Version=3.0.1000.0, Culture=neutral, PublicKeyToken=94bc3704cddfc263, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Reactive.Interfaces.3.1.1\lib\net45\System.Reactive.Interfaces.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Reactive.Linq, Version=3.0.3000.0, Culture=neutral, PublicKeyToken=94bc3704cddfc263, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Reactive.Linq.3.1.1\lib\net46\System.Reactive.Linq.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Reactive.PlatformServices, Version=3.0.3000.0, Culture=neutral, PublicKeyToken=94bc3704cddfc263, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Reactive.PlatformServices.3.1.1\lib\net46\System.Reactive.PlatformServices.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Reactive.Windows.Threading, Version=3.0.1000.0, Culture=neutral, PublicKeyToken=94bc3704cddfc263, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Reactive.Windows.Threading.3.1.1\lib\net45\System.Reactive.Windows.Threading.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Windows" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xml" />
-    <Reference Include="WindowsBase" />
+    <Compile Remove="Core\AppServices\**" />
+    <Compile Remove="Core\Architecture\Models\**" />
+    <Compile Remove="Core\ManagedServices\**" />
+    <Compile Remove="Sessions\**" />
+    <EmbeddedResource Remove="Core\AppServices\**" />
+    <EmbeddedResource Remove="Core\Architecture\Models\**" />
+    <EmbeddedResource Remove="Core\ManagedServices\**" />
+    <EmbeddedResource Remove="Sessions\**" />
+    <None Remove="Core\AppServices\**" />
+    <None Remove="Core\Architecture\Models\**" />
+    <None Remove="Core\ManagedServices\**" />
+    <None Remove="Sessions\**" />
   </ItemGroup>
+
   <ItemGroup>
-    <Compile Include="FileKLineFrameStorageService.cs" />
-    <Compile Include="FileSymbolStorageService.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Remove="AppContext.cs" />
+    <Compile Remove="Core\Architecture\IServiceInstanceManager.cs" />
+    <Compile Remove="Extensions\IEnumerableExtension.cs" />
+    <Compile Remove="Extensions\StringExtension.cs" />
+    <Compile Remove="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+
   <ItemGroup>
-    <ProjectReference Include="..\..\..\ServiceFramework\Projects\Core\SF.Abstractions\SF.Abstractions.csproj">
-      <Project>{55beb521-415d-4d84-a861-25fb78d07345}</Project>
-      <Name>SF.Abstractions</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\ServiceFramework\Projects\Core\SF.Extensions\SF.Extensions.csproj">
-      <Project>{03ce2c19-5e88-4a81-8c40-63eff33278ab}</Project>
-      <Name>SF.Extensions</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Skuld.Common\Skuld.Common.csproj">
-      <Project>{20fde544-c04f-4be4-99fe-56b7da178616}</Project>
-      <Name>Skuld.Common</Name>
-    </ProjectReference>
+    <Folder Include="Properties\" />
   </ItemGroup>
+
   <ItemGroup>
-    <None Include="app.config" />
-    <None Include="packages.config" />
+    <PackageReference Include="dapper" Version="1.50.2" />
+    <PackageReference Include="System.ComponentModel.Annotations" Version="4.4.0" />
+    <PackageReference Include="system.reactive" Version="3.1.1" />
   </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\ServiceFramework\Projects\Core\SF.Abstractions\SF.Abstractions.csproj" />
+    <ProjectReference Include="..\..\..\ServiceFramework\Projects\Core\SF.Extensions\SF.Extensions.csproj" />
+    <ProjectReference Include="..\Skuld.Common\Skuld.Common.csproj" />
+  </ItemGroup>
+
 </Project>

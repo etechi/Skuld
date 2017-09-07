@@ -36,7 +36,7 @@ namespace Skuld.DataSync
 
 		public AppContext CreateDbContext(string[] args)
 		{
-			Debugger.Launch();
+			//Debugger.Launch();
 			var sc = new Microsoft.Extensions.DependencyInjection.ServiceCollection();
 			//sc.AddLogging(lb => lb.AddDebug().AddFilter(l=>true));
 			var sp = new Startup().ConfigureServices(sc);

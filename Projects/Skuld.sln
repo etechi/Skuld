@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26730.10
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Skuld.Common", "Skuld.Common\Skuld.Common.csproj", "{20FDE544-C04F-4BE4-99FE-56B7DA178616}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Skuld.Common", "Skuld.Common\Skuld.Common.csproj", "{20FDE544-C04F-4BE4-99FE-56B7DA178616}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Skuld.DataProviders.Sina", "Skuld.DataProviders.Sina\Skuld.DataProviders.Sina.csproj", "{4B65FCBC-26B1-499F-B34B-D0F7EAB42163}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Skuld.DataProviders.Sina", "Skuld.DataProviders.Sina\Skuld.DataProviders.Sina.csproj", "{4B65FCBC-26B1-499F-B34B-D0F7EAB42163}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Skuld.DataStorages.Files", "Skuld.DataStorages.Files\Skuld.DataStorages.Files.csproj", "{8326A449-2550-42E3-BAAD-463FA8BADB0E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Skuld.DataStorages.Files", "Skuld.DataStorages.Files\Skuld.DataStorages.Files.csproj", "{8326A449-2550-42E3-BAAD-463FA8BADB0E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Skuld.DataStorages.Entity", "Skuld.DataStorages.Entity\Skuld.DataStorages.Entity.csproj", "{A19B9450-B389-444F-9F1C-8AA24D2F9A52}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Skuld.DataStorages.Entity", "Skuld.DataStorages.Entity\Skuld.DataStorages.Entity.csproj", "{A19B9450-B389-444F-9F1C-8AA24D2F9A52}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Skuld.DataSync", "Skuld.DataSync\Skuld.DataSync.csproj", "{361286BB-3AE0-4B89-A949-9BDFA032F0D5}"
 EndProject
