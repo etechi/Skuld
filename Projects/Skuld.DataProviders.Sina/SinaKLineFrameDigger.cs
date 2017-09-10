@@ -163,7 +163,7 @@ namespace Skuld.DataProviders.Sina
 			var frames = Json.Parse<FundRecord[]>(str).Select(r =>
 			{
 				var price = r.jjjz.ToFloat();
-				var AdjuestRate = r.ljjz.ToFloat() / price;
+				var AdjuestRate = r.ljjz==null?1:r.ljjz.ToFloat() / price;
 				var time = r.fbrq.ToDateTime(
 					r.fbrq.Length == 10 ? "yyyy-MM-dd" : "yyyy-MM-dd HH:mm:ss",
 					System.Globalization.DateTimeStyles.AssumeLocal
