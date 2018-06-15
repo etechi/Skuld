@@ -1,23 +1,7 @@
 ﻿using System;
-using Skuld.DataProviders.Sina;
-using Skuld.DataStorages.Entity;
 using System.Threading.Tasks;
-using Skuld;
-using System.Reactive.Linq;
-using System.IO;
-using System.Reactive.Joins;
-using System.Collections.Generic;
-using System.Reactive.Disposables;
-using System.Linq;
-using Microsoft.EntityFrameworkCore;
 using SF.Core.ServiceManagement;
-using Skuld.DataProviders;
-using Skuld.DataStorages;
-using SF.Core.Serialization;
-using SF.Data.EntityFrameworkCore;
-using SF.Core.Hosting;
-using SF.Core.ServiceManagement.Management;
-using SF.Core.Logging;
+using SF.Sys.Services;
 
 namespace Skuld.DataSync
 {

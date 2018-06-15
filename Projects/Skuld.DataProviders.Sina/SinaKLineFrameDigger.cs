@@ -7,6 +7,8 @@ using System.Text;
 using System.Threading.Tasks;
 using SF;
 using SF.Core;
+using SF.Sys;
+using SF.Sys.HttpClients;
 
 namespace Skuld.DataProviders.Sina
 {
@@ -48,9 +50,10 @@ namespace Skuld.DataProviders.Sina
 				};
 			}
 		}
-
-		public SinaKLineFrameDigger(SinaSetting Setting)
+		IHttpClient HttpClient { get; }
+		public SinaKLineFrameDigger(SinaSetting Setting, IHttpClient HttpClient)
 		{
+			this.HttpClient = HttpClient;
 			this.Setting = Setting;
 		}
 		class record
@@ -72,14 +75,15 @@ namespace Skuld.DataProviders.Sina
 		{
 			//public string AdjuestPriceUrl { get; private set; } = "http://finance.sina.com.cn/realstock/newcompany/{SYMBOL}/phfq.js";
 			//public string TradePriceUrl { get; private set; } = "http://money.finance.sina.com.cn/quotes_service/api/jsonp_v2.php/a/CN_MarketData.getKLineData?symbol={SYMBOL}&scale={SCALE}&ma=no&datalen={COUNT}";
-			var args = new Dictionary<string, string> {
+			var args = new Dictionary<string, object> {
 				{ "SCALE", scale.ToString() },
 				{ "COUNT", count.ToString() },
 				{ "SYMBOL", symbol }
 				};
 
-			var url = new Uri(SimpleTemplate.Eval(Setting.StockAndIndexTradePriceUrl, args));
-			var str = await url.GetString(Encoding.ASCII);
+			var url = new Uri(Setting.StockAndIndexTradePriceUrl.Replace(args));
+			//var str = await url.GetString(Encoding.ASCII);
+			var str = await HttpClient.From(url).GetString();
 			if (string.IsNullOrEmpty(str))
 				return Array.Empty<KLineFrame>();
 
@@ -106,8 +110,9 @@ namespace Skuld.DataProviders.Sina
 			var re = frames.ToArray();
 			if (adjuest)
 			{
-				var adjurl = new Uri(SimpleTemplate.Eval(Setting.StockAndIndexAdjuestPriceUrl, args));
-				var adjstr = await adjurl.GetString(Encoding.ASCII);
+				var adjurl = new Uri(Setting.StockAndIndexAdjuestPriceUrl.Replace(args));
+				//var adjstr = await adjurl.GetString(Encoding.ASCII);
+				var adjstr = await HttpClient.From(adjurl).GetString();
 				if (adjstr == null)
 					return null;
 
@@ -146,14 +151,15 @@ namespace Skuld.DataProviders.Sina
 		{
 			//public string AdjuestPriceUrl { get; private set; } = "http://finance.sina.com.cn/realstock/newcompany/{SYMBOL}/phfq.js";
 			//public string FundPriceUrl { get; set; } = "http://stock.finance.sina.com.cn/fundInfo/api/openapi.php/CaihuiFundInfoService.getNav?callback=abc&symbol=519690&datefrom=&dateto=&page={PAGE}&num={COUNT}";
-			var args = new Dictionary<string, string> {
+			var args = new Dictionary<string, object> {
 				{ "PAGE", "1" },
 				{ "COUNT", count.ToString() },
 				{ "SYMBOL", symbol }
 				};
 
-			var url = new Uri(SimpleTemplate.Eval(Setting.FundPriceUrl, args));
-			var str = await url.GetString(Encoding.ASCII);
+			var url = new Uri(Setting.FundPriceUrl.Replace(args));
+			//var str = await url.GetString(Encoding.ASCII);
+			var str = await HttpClient.From(url).GetString();
 			if (string.IsNullOrEmpty(str))
 				return Array.Empty<KLineFrame>();
 			str = str.Substring("\"data\":[{", -2, "}]", 2);

@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using SF;
+using SF.Sys.Linq;
+
 namespace Skuld
 {
 	public class PropertyGroup

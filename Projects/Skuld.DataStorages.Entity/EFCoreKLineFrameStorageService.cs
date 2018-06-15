@@ -6,8 +6,8 @@ using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using SF;
-using SF.Entities;
-using SF.Data;
+using SF.Sys.Linq;
+using SF.Sys.Data;
 using System.Data.Common;
 using Dapper;
 using System.Threading;
@@ -17,15 +17,12 @@ namespace Skuld.DataStorages.Entity
 	
 	public class EFCoreKLineFrameStorageService  : IKLineFrameStorageService
 	{
-		public DbConnection Connection { get; }
-		public IDataContext DataContext { get; }
+		public IDataScope DataScope { get; }
 		public EFCoreKLineFrameStorageService(
-			DbConnection Connection,
-			IDataContext DataContext
+			IDataScope DataScope
 			)
 		{
-			this.DataContext = DataContext;
-			this.Connection = Connection;
+			this.DataScope = DataScope;
 		}
 		
 		class State
@@ -40,12 +37,14 @@ namespace Skuld.DataStorages.Entity
 			DateTime endTime;
 			
 			var id = symbol.GetIdent();
-			endTime = DataContext.Set<Models.Price>().AsQueryable(true)
+			endTime = DataScope.Use("结束时间", Context =>
+				Context.Queryable<Models.Price>()
 				.Where(p => p.Symbol == id && p.Interval == Interval)
 				.OrderByDescending(p => p.Time)
 				.Take(1)
-				.Select(p=>p.Time)
-				.SingleOrDefault();
+				.Select(p => p.Time)
+				.SingleOrDefaultAsync()
+				).Result;
 			
 
 			var end = endTime==default(DateTime)?new DateTime(1990, 1, 1):endTime;
@@ -71,19 +70,23 @@ namespace Skuld.DataStorages.Entity
 		{
 			var symbol = new Symbol { Scope = Scope, Code = Code }.GetIdent();
 
-			var frames= DataContext.Set<Models.Price>().AsQueryable(true)
-				.Where(p => p.Symbol == symbol && p.Interval == Interval && p.Time >= TimeRange.Begin && p.Time <= TimeRange.End)
-				.OrderBy(p => p.Time)
-				.Select(p => new KLineFrame
-				{
-					AdjuestRate=p.AdjustRate,
-					Close=p.Close,
-					High=p.High,
-					Low=p.Low,
-					Open=p.Open,
-					Time=p.Time,
-					Volume=p.Volume
-				}).ToArray();
+			var frames = DataScope.Use("载入项目",
+				Context =>
+					Context.Queryable<Models.Price>()
+					.Where(p => p.Symbol == symbol && p.Interval == Interval && p.Time >= TimeRange.Begin && p.Time <= TimeRange.End)
+					.OrderBy(p => p.Time)
+					.Select(p => new KLineFrame
+					{
+						AdjuestRate = p.AdjustRate,
+						Close = p.Close,
+						High = p.High,
+						Low = p.Low,
+						Open = p.Open,
+						Time = p.Time,
+						Volume = p.Volume
+					}).ToArrayAsync()
+				).Result;
+				
 				
 			return frames.ToObservable();
 		}
@@ -104,64 +107,61 @@ namespace Skuld.DataStorages.Entity
 
 			var ident = Symbol.GetIdent();
 
-			await TaskUtils.Retry(async ct =>
+			await DataScope.Retry("增加报价",async Context =>
 			{
-				await DataContext.UseTransaction("add prices", async (tran) =>
-				 {
-					 var set = DataContext.Set<Models.Price>();
-					 var existsframes = await set.AsQueryable(true)
-						 .Where(p => p.Symbol == ident && p.Interval == Interval && p.Time >= minTime)
-						 .ToDictionaryAsync(p => p.Time);
-					 var setName = set.Metadata.EntitySetName;
-					 foreach (var f in frames.Values)
-					 {
-						 Models.Price p;
-						 if (!existsframes.TryGetValue(f.Time, out p))
-						 {
-							 await Connection.ExecuteAsync(
-								 $"INSERT INTO [{setName}] ([symbol], [interval], [time],[open],[close],[high],[low],[volume], [adjustrate]) " +
-								 "VALUES(@symbol,@interval,@time,@open,@close,@high,@low,@volume,@adjustrate)",
-								 new
-								 {
-									 symbol = ident,
-									 interval = Interval,
-									 time = f.Time,
-									 open = f.Open,
-									 close = f.Close,
-									 high = f.High,
-									 low = f.Low,
-									 volume = f.Volume,
-									 adjustrate = f.AdjuestRate
-								 },
-								 tran
-							 );
-						 }
-						 else if (p.Open != f.Open || p.Close != f.Close || p.High != f.High || p.Low != f.Low ||
-							 p.Volume != f.Volume || p.AdjustRate != f.AdjuestRate
-							 )
-							 await Connection.ExecuteAsync(
-								 $"update [{setName}] set " +
-								 "[open]=@open,[close]=@close,[high]=@high,[low]=@low,[volume]=@volume, [adjustrate]=@adjustrate " +
-								 "where [symbol]=@symbol and [interval]=@interval and [time]=@time",
-								 new
-								 {
-									 open = f.Open,
-									 close = f.Close,
-									 high = f.High,
-									 low = f.Low,
-									 volume = f.Volume,
-									 adjustrate = f.AdjuestRate,
-									 symbol = ident,
-									 interval = Interval,
-									 time = f.Time
-								 },
-								 tran
-								 );
-					 }
-					 return 0;
-				 });
+				var ctxex = (IDataContextExtension)Context;
+				var set = Context.Set<Models.Price>();
+				var existsframes = await set.AsQueryable(true)
+					.Where(p => p.Symbol == ident && p.Interval == Interval && p.Time >= minTime)
+					.ToDictionaryAsync(p => p.Time);
+				var setName = set.Metadata.EntitySetName;
+				foreach (var f in frames.Values)
+				{
+					Models.Price p;
+					if (!existsframes.TryGetValue(f.Time, out p))
+					{
+						await ctxex.GetDbConnection().ExecuteAsync(
+							$"INSERT INTO [{setName}] ([symbol], [interval], [time],[open],[close],[high],[low],[volume], [adjustrate]) " +
+							"VALUES(@symbol,@interval,@time,@open,@close,@high,@low,@volume,@adjustrate)",
+							new
+							{
+								symbol = ident,
+								interval = Interval,
+								time = f.Time,
+								open = f.Open,
+								close = f.Close,
+								high = f.High,
+								low = f.Low,
+								volume = f.Volume,
+								adjustrate = f.AdjuestRate
+							},
+							(DbTransaction)ctxex.Transaction?.RawTransaction
+						);
+					}
+					else if (p.Open != f.Open || p.Close != f.Close || p.High != f.High || p.Low != f.Low ||
+						p.Volume != f.Volume || p.AdjustRate != f.AdjuestRate
+						)
+						await ctxex.GetDbConnection().ExecuteAsync(
+							$"update [{setName}] set " +
+							"[open]=@open,[close]=@close,[high]=@high,[low]=@low,[volume]=@volume, [adjustrate]=@adjustrate " +
+							"where [symbol]=@symbol and [interval]=@interval and [time]=@time",
+							new
+							{
+								open = f.Open,
+								close = f.Close,
+								high = f.High,
+								low = f.Low,
+								volume = f.Volume,
+								adjustrate = f.AdjuestRate,
+								symbol = ident,
+								interval = Interval,
+								time = f.Time
+							},
+							(DbTransaction)ctxex.Transaction?.RawTransaction
+							);
+				}
 				return 0;
-			});
+			},IsolationLevel:System.Data.IsolationLevel.ReadCommitted);
 		}
 	}
 }

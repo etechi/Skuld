@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using SF;
 using System.Text.RegularExpressions;
 using System.Text;
+using SF.Sys;
+using SF.Sys.HttpClients;
 
 namespace Skuld.DataProviders.Sina
 {
@@ -15,11 +17,12 @@ namespace Skuld.DataProviders.Sina
 		static Regex RegHtmlClear = new Regex("<[^>]+>");
 		public async Task<Dictionary<string,string[]>> Dig(Symbol symbol)
 		{
-			var args = new Dictionary<string, string> {
+			var args = new Dictionary<string, object> {
 				{"SYMBOL",symbol.Scope.ScopeCode+symbol.Code }
 				};
-			var url = new Uri(SimpleTemplate.Eval(Setting.CategoryUrl, args));
-			var html=await url.GetString();
+			var url = new Uri(Setting.CategoryUrl.Replace(args));
+			//var html=await url.GetString();
+			var html = await HttpClient.From(url).GetString();
 			var start = html.IndexOf("热点板块");
 			if (start == -1)
 				return new Dictionary<string, string[]>();
@@ -41,9 +44,11 @@ namespace Skuld.DataProviders.Sina
 				).ToDictionary(i => i.type, i => i.items);
 		}
 		public SinaSetting Setting { get; }
-		public SinaSymbolCategoryDigger(SinaSetting Setting)
+		public IHttpClient HttpClient { get; }
+		public SinaSymbolCategoryDigger(SinaSetting Setting, IHttpClient HttpClient)
 		{
 			this.Setting = Setting;
+			this.HttpClient = HttpClient;
 		}
 	}
 }

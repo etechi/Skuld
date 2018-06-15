@@ -4,18 +4,17 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using SF;
 using System.Linq;
-using SF.Entities;
-using SF.Data;
+using SF.Sys.Data;
 using System.Collections.Concurrent;
 
 namespace Skuld.DataStorages.Entity
 {
 	public class EFCoreSymbolCategoryStorageService : ISymbolCategoryStorageService
 	{
-		IDataContext Context { get; }
-		public EFCoreSymbolCategoryStorageService(IDataContext Context)
+		IDataScope DataScope { get; }
+		public EFCoreSymbolCategoryStorageService(IDataScope DataScope)
 		{
-			this.Context = Context;
+			this.DataScope= DataScope;
 		}
 		static ConcurrentDictionary<string, string> TypeNames = new ConcurrentDictionary<string, string>();
 
@@ -23,8 +22,8 @@ namespace Skuld.DataStorages.Entity
 		{
 			if (TypeNames.ContainsKey(type))
 				return;
-			await Context.Retry(async ct =>
-				await Context.Set<Models.CategoryType>().EnsureAsync(
+			await DataScope.Retry("新增分类类型",Context=>
+				Context.Set<Models.CategoryType>().EnsureAsync(
 					new Models.CategoryType
 					{
 						Name = type
@@ -38,8 +37,8 @@ namespace Skuld.DataStorages.Entity
 			var key = type + ":" + name;
 			if (CatNames.ContainsKey(key))
 				return;
-			await Context.Retry(async ct =>
-				await Context.Set<Models.Category>().EnsureAsync(
+			await DataScope.Retry("新增分类",Context=>
+				Context.Set<Models.Category>().EnsureAsync(
 					new Models.Category
 					{
 						Type = type,
@@ -58,7 +57,7 @@ namespace Skuld.DataStorages.Entity
 					await EnsureCategory(p.Key, cat);
 			}
 
-			await Context.Retry(async ct =>
+			await DataScope.Retry("新增项目", async Context =>
 			{
 				var set = Context.Set<Models.CategorySymbol>();
 				var id = symbol.GetIdent();

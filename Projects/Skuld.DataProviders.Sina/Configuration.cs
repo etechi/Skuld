@@ -5,13 +5,14 @@ using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 using SF;
+using SF.Sys.Services;
 using Skuld.DataProviders;
 using Skuld.DataProviders.Sina;
-namespace SF.Core.ServiceManagement
+namespace SF.Sys.Services
 {
 	public static class SinaConfiguration
 	{
-		public static IServiceCollection UseSinaDataProviders(this IServiceCollection sc,SinaSetting Setting=null)
+		public static IServiceCollection AddSinaDataProviders(this IServiceCollection sc,SinaSetting Setting=null)
 		{
 			sc.AddSingleton(Setting ?? new SinaSetting());
 			sc.AddScoped<ISymbolScanner, SinaSymbolScanner>();

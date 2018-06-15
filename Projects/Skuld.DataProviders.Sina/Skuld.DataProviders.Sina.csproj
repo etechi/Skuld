@@ -39,13 +39,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.ComponentModel.Annotations" Version="4.4.0" />
-    <PackageReference Include="system.reactive" Version="3.1.1" />
+    <PackageReference Include="sf.sys" Version="1.0.21" />
+    <PackageReference Include="sf.sys.extensions" Version="1.0.21" />
+    <PackageReference Include="System.ComponentModel.Annotations" Version="4.5.0" />
+    <PackageReference Include="system.reactive" Version="4.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\ServiceFramework\Projects\Core\SF.Abstractions\SF.Abstractions.csproj" />
-    <ProjectReference Include="..\..\..\ServiceFramework\Projects\Core\SF.Extensions\SF.Extensions.csproj" />
     <ProjectReference Include="..\Skuld.Common\Skuld.Common.csproj" />
   </ItemGroup>
 

@@ -1,20 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reactive.Linq;
-using System.Reactive.Threading.Tasks;
-using System.Threading.Tasks;
-using SF;
+﻿using SF.Sys.Services;
 using Skuld.DataStorages;
 using Skuld.DataStorages.Entity;
-using SF.Entities;
-using SF.Data;
 using Skuld.DataStorages.Entity.Models;
-namespace SF.Core.ServiceManagement
+
+namespace SF.Sys.Services
 {
 	public static class SkuldEntityDataStorageConfiguration
 	{
-		public static IServiceCollection UseEntityDataStorages(this IServiceCollection sc,string TablePrefix)
+		public static IServiceCollection AddEntityDataStorages(this IServiceCollection sc,string TablePrefix="Skuld")
 		{
 			sc.AddDataModules<Symbol>(TablePrefix);
 			sc.AddDataModules<Category,CategorySymbol,CategoryType>(TablePrefix);

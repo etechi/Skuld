@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 using SF;
 using System.Text.RegularExpressions;
 using System.Text;
+using SF.Sys.Linq;
+using SF.Sys;
+using SF.Sys.HttpClients;
 
 namespace Skuld.DataProviders.Sina
 {
@@ -17,12 +20,12 @@ namespace Skuld.DataProviders.Sina
 		async Task<string> Dig(Symbol symbol,string type,string startContent)
 		{
 			//Console.WriteLine($"start dig {symbol} {type}");
-			var args = new Dictionary<string, string> {
+			var args = new Dictionary<string, object> {
 				{"TYPE",type },
 				{"SYMBOL",symbol.Scope.ScopeCode+symbol.Code }
 				};
-			var url = new Uri(SimpleTemplate.Eval(Setting.PropertyUrl, args));
-			var html = await url.GetString();
+			var url = new Uri(Setting.PropertyUrl.Replace(args));
+			var html = await HttpClient.From(url).GetString();
 			var start = html.IndexOf(startContent);
 			if (start == -1)
 				return null;
@@ -235,9 +238,11 @@ namespace Skuld.DataProviders.Sina
 				   select g;
 		}
 		public SinaSetting Setting { get; }
-		public SinaSymbolPropertyDigger(SinaSetting Setting)
+		public IHttpClient HttpClient { get; }
+		public SinaSymbolPropertyDigger(SinaSetting Setting, IHttpClient HttpClient)
 		{
 			this.Setting = Setting;
+			this.HttpClient = HttpClient;
 		}
 	}
 }

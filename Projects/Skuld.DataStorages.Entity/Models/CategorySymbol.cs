@@ -1,10 +1,6 @@
-﻿using SF.Entities;
-using SF.Data;
-using System;
-using System.Collections.Generic;
+﻿using SF.Sys.Data;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text;
 
 namespace Skuld.DataStorages.Entity.Models
 {

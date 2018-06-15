@@ -4,9 +4,8 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
-using SF;
-using System.Text;
-using SF.Core;
+using SF.Sys;
+using SF.Sys.HttpClients;
 
 namespace Skuld.DataProviders.Sina
 {
@@ -20,13 +19,19 @@ namespace Skuld.DataProviders.Sina
 		}
 		async Task<StockAndIndexRecord[]> GetStockAndIndex(int page, string node)
 		{
-			var args = new Dictionary<string, string> {
+			var args = new Dictionary<string, object> {
 				{ "PAGE", page.ToString() },
 				{ "COUNT", "80" },
 				{"NODE",node }
 				};
-			var url = new Uri(SimpleTemplate.Eval(Setting.StockAndIndexScanUrl, args));
-			return await url.Get<StockAndIndexRecord[]>(UriExtension.GBK);
+			var url = new Uri(Setting.StockAndIndexScanUrl.Replace(args));
+			//System.Text.Encoding.GetEncoding
+
+			return Json.Parse<StockAndIndexRecord[]>(await HttpClient.From(url).Execute(async resp=>
+			{
+				var re=await resp.Content.ReadAsStringAsync();
+				return re;
+			}));
 		}
 		IObservable<StockAndIndexRecord> GetAllStockAndIndexRecords(string node)
 		{
@@ -53,12 +58,16 @@ namespace Skuld.DataProviders.Sina
 		}
 		async Task<FundRecord[]> GetFund(int page)
 		{
-			var args = new Dictionary<string, string> {
+			var args = new Dictionary<string, object> {
 				{ "PAGE", page.ToString() },
 				{ "COUNT", "200" }
 				};
-			var url = new Uri(SimpleTemplate.Eval(Setting.FundSymbolScanUrl, args));
-			var str = await url.GetString(UriExtension.GBK);
+			var url = new Uri(Setting.FundSymbolScanUrl.Replace(args));
+			var str = await HttpClient.From(url).Execute(async resp =>
+			{
+				var buf = await resp.Content.ReadAsByteArrayAsync();
+				return System.Text.Encoding.GetEncoding("GBK").GetString(buf);
+			});
 			return Json.Parse<FundRecord[]>(str.Substring("data:[",-1, "}]",2));
 		}
 		IObservable<FundRecord> GetAllFundRecords()
@@ -118,8 +127,10 @@ namespace Skuld.DataProviders.Sina
 			return a.Concat(i).Concat(f);
 		}
 		public SinaSetting Setting { get; }
-		public SinaSymbolScanner(SinaSetting Setting)
+		public IHttpClient HttpClient { get; }
+		public SinaSymbolScanner(SinaSetting Setting, IHttpClient HttpClient)
 		{
+			this.HttpClient = HttpClient;
 			this.Setting = Setting;
 		}
 	}
