@@ -16,7 +16,8 @@ namespace Skuld.DataProviders.Sina
 
 
 		[Display(Name = "基金代码扫描URL")]
-		public string FundSymbolScanUrl { get; set; } = "http://vip.stock.finance.sina.com.cn/fund_center/data/jsonp.php/Begin/NetValueReturn_Service.NetValueReturnOpen?page={PAGE}&num={COUNT}&sort=form_year&asc=0&ccode=&type2=0&type3=";
+		//public string FundSymbolScanUrl { get; set; } = "http://vip.stock.finance.sina.com.cn/fund_center/data/jsonp.php/Begin/NetValueReturn_Service.NetValueReturnOpen?page={PAGE}&num={COUNT}&sort=form_year&asc=0&ccode=&type2=0&type3=";
+		public string FundSymbolScanUrl { get; set; } = "http://stock.finance.sina.com.cn/fundfilter/api/openapi.php/MoneyFinanceFundFilterService.getFundFilterAll?callback=makeFilterData&page={PAGE}&num={COUNT}&dpc=1";
 		[Display(Name = "基金价格")]
 		public string FundPriceUrl { get; set; } = "http://stock.finance.sina.com.cn/fundInfo/api/openapi.php/CaihuiFundInfoService.getNav?callback=abc&symbol={SYMBOL}&datefrom=&dateto=&page={PAGE}&num={COUNT}";
 

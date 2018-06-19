@@ -60,19 +60,20 @@ namespace Skuld.DataProviders.Sina
 		{
 			var args = new Dictionary<string, object> {
 				{ "PAGE", page.ToString() },
-				{ "COUNT", "200" }
+				{ "COUNT", "500" }
 				};
 			var url = new Uri(Setting.FundSymbolScanUrl.Replace(args));
-			var str = await HttpClient.From(url).Execute(async resp =>
-			{
-				var buf = await resp.Content.ReadAsByteArrayAsync();
-				return System.Text.Encoding.GetEncoding("GBK").GetString(buf);
-			});
-			return Json.Parse<FundRecord[]>(str.Substring("data:[",-1, "}]",2));
+			var str = await HttpClient.From(url).GetString();
+			//.Execute(async resp =>
+			//{
+			//	var buf = await resp.Content.ReadAsByteArrayAsync();
+			//	return System.Text.Encoding.GetEncoding("GBK").GetString(buf);
+			//});
+			return Json.Parse<FundRecord[]>(str.Substring("data\":[",-1, "}]",2));
 		}
 		IObservable<FundRecord> GetAllFundRecords()
 		{
-			var pages = Enumerable.Range(1, 100)
+			var pages = Enumerable.Range(1, 20)
 				.ToObservable()
 				.Delay(i => Observable.Timer(TimeSpan.FromMilliseconds(i * 2 * 100)))
 				;

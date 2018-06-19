@@ -50,9 +50,8 @@ namespace Skuld.DataProviders.Sina
 		{
 			if (Type==ParseType.MultiGroups)
 			{
-				content = content.Split('\n').Select(l => l.Trim()).Join("\n");
-				foreach (var grp in content.Replace("\n\n", "\0").Split('\0'))
-					foreach (var vg in ParsePropertyGroups(symbol,grp, group, ParseType.Normal, DateProperty))
+				foreach (var grp in SplitGroup(content, RemoveProps))
+					foreach (var vg in ParsePropertyGroups(symbol, grp, group, ParseType.Normal, DateProperty))
 						yield return vg;
 				yield break;
 			}
@@ -69,8 +68,7 @@ namespace Skuld.DataProviders.Sina
 				{
 					Name = group,
 					Symbol = symbol,
-					Rows =
-						content.Split('\n').Select(l => l.Trim()).Join("\n").Replace("\n\n", "\0").Split('\0').Select(
+					Rows =SplitGroup(content,RemoveProps).Select(
 							ctn => ParsePropertyGroups(symbol, ctn, group, ParseType.Normal, null, RemoveProps).FirstOrDefault()?.Rows?.FirstOrDefault()
 							).Where(r=>r!=null).ToArray()
 				};
@@ -121,6 +119,21 @@ namespace Skuld.DataProviders.Sina
 			}
 			yield return g;
 		}
+
+		private static IEnumerable<string> SplitGroup(string content, string[] RemoveProps)
+		{
+			//以第一行的键值作为分组依据
+			var removeKeys = RemoveProps?.ToHashSet();
+			content = content
+				.SplitAndNormalizae('\n')
+				.Where(l => !(removeKeys?.Contains(l.Split2(':').Item1) ?? false))
+				.Join("\n");
+			var idx = content.IndexOf(':');
+			var splitter = "\n" + content.Substring(0, idx + 1).Trim();
+			content = content.Replace(splitter, "\0" + splitter);
+			return content.Split('\0');
+		}
+
 		async Task<IEnumerable<PropertyGroup>> DigCompany(Symbol symbol)
 		{
 			var content = await Dig(symbol, "company", "【公司概况】");
